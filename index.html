@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Albert Nunes Dias | Portfólio Profissional</title>
+<meta name="description" content="Portfólio profissional de Albert Nunes Dias, estudante de Gestão da Tecnologia da Informação, com formação técnica em T.I e Redes de Computadores e experiências profissionais.">
+
+<meta property="og:title" content="Albert Nunes Dias | Portfólio Profissional">
+<meta property="og:description" content="Portfólio profissional de Albert Nunes Dias, estudante de Gestão da Tecnologia da Informação, com formação técnica em T.I e Redes de Computadores.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="photo.png">
+
+<!--icone da aba blabla-->
+
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0D3E85">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===================== BOOT LOADER ===================== -->
+<div class="boot-loader" id="bootLoader" aria-hidden="true">
+  <div class="boot-box">
+    <p class="boot-line"><span class="boot-prompt">&gt;</span> <span id="bootText"></span><span class="boot-cursor">_</span></p>
+    <div class="boot-bar"><span id="bootBarFill"></span></div>
+  </div>
+</div>
+
+<a class="skip-link" href="#inicio">Pular para o conteúdo</a>
+
+<!-- Barra de progresso de leitura -->
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header" id="topo">
+  <div class="header-inner">
+    <a href="#inicio" class="brand">
+<span class="brand-mark"><img src="icon-192.png" alt=""></span> <!--=========== meu rosto juntamente ao nome no head ============= -->
+      <span class="brand-name">Albert Nunes Dias</span>
+    </a>
+
+    <nav class="main-nav" id="mainNav" aria-label="Navegação principal">
+      <a href="#inicio">Início</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#formacao">Formação</a>
+      <a href="#qualificacoes">Qualificações</a>
+      <a href="#cursos">Cursos</a>
+      <a href="#experiencia">Experiência</a>
+      <a href="#contato" class="nav-cta">Contato</a>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mainNav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <canvas id="networkCanvas" class="network-canvas" aria-hidden="true"></canvas>
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-mono">
+          <span class="status-dot" aria-hidden="true"></span>
+          system.status: <span class="typed-status">disponível</span>
+        </p>
+        <h1>Albert Nunes<br><span>Dias</span></h1>
+        <p class="hero-role">
+          <span class="typed-role" id="typedRole"></span><span class="type-cursor">|</span>
+        </p>
+        <p class="hero-objective">Em busca de uma oportunidade para desenvolver e aprimorar meus conhecimentos, construindo junto à empresa novos caminhos de crescimento.</p>
+        <div class="hero-actions">
+          <a href="#experiencia" class="btn btn-primary magnetic">Ver experiência</a>
+          <a href="#contato" class="btn btn-outline magnetic">Entrar em contato</a>
+        </div>
+        <div class="hero-tags">
+          <span>Fatec Barueri</span>
+          <span>T.I e Redes de Computadores</span>
+          <span>Barueri – SP</span>
+        </div>
+      </div>
+
+      <div class="hero-photo">
+        <div class="photo-frame">
+          <img src="photo.png" alt="Foto de Albert Nunes Dias" id="profilePhoto">
+          <div class="photo-fallback" id="photoFallback" aria-hidden="true">AND</div>
+          <svg class="photo-ring" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="100" cy="100" r="97" />
+          </svg>
+        </div>
+
+        <div class="terminal-card" aria-hidden="true">
+          <div class="terminal-head">
+            <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+            <span class="terminal-title">albert@portfolio ~ %</span>
+          </div>
+          <div class="terminal-body" id="terminalBody"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-divider" aria-hidden="true"></div>
+  </section>
+
+  <!-- ===================== SOBRE + OBJETIVO ===================== -->
+  <section class="section" id="sobre">
+    <div class="section-inner about-grid">
+      <div class="section-head">
+        <p class="eyebrow">Quem sou eu</p>
+        <h2>Sobre mim</h2>
+      </div>
+
+      <div class="about-cards">
+        <div class="info-card tilt-card">
+          <div class="tilt-inner">
+            <span class="info-label">Nome</span>
+            <span class="info-value">Albert Nunes Dias</span>
+          </div>
+        </div>
+        <div class="info-card tilt-card">
+          <div class="tilt-inner">
+            <span class="info-label">Nascimento</span>
+            <span class="info-value">14/03/2004</span>
+          </div>
+        </div>
+        <div class="info-card tilt-card">
+          <div class="tilt-inner">
+            <span class="info-label">Estado civil</span>
+            <span class="info-value">Solteiro</span>
+          </div>
+        </div>
+        <div class="info-card tilt-card">
+          <div class="tilt-inner">
+            <span class="info-label">Nacionalidade</span>
+            <span class="info-value">Brasileiro</span>
+          </div>
+        </div>
+        <div class="info-card info-card-wide tilt-card">
+          <div class="tilt-inner">
+            <span class="info-label">Localização</span>
+            <span class="info-value">Parque dos Camargos — Barueri, SP</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="objective-panel">
+        <p class="eyebrow eyebrow-light">Objetivo profissional</p>
+        <p class="objective-text">"Em busca de uma oportunidade para desenvolver e melhorar meus conhecimentos e o desenvolvimento entre eu e a empresa."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FORMAÇÃO ===================== -->
+  <section class="section section-surface" id="formacao">
+    <div class="section-inner">
+      <div class="section-head">
+        <p class="eyebrow">Trajetória acadêmica</p>
+        <h2>Formação Acadêmica</h2>
+      </div>
+
+      <ol class="timeline" id="timelineFormacao">
+        <div class="timeline-fill" aria-hidden="true"></div>
+        <li class="timeline-item timeline-active">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-status status-progress">Em andamento</span>
+            <h3>Gestão da Tecnologia da Informação</h3>
+            <p class="timeline-org">Fatec Barueri — Padre Danilo José de Oliveira Ohl</p>
+          </div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <span class="timeline-status status-done">Concluído · Nov/2021</span>
+            <h3>Ensino Médio / Curso Técnico em T.I e Redes de Computadores</h3>
+            <p class="timeline-org">ITB Professor Munir José</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== QUALIFICAÇÕES + CONHECIMENTOS ===================== -->
+  <section class="section" id="qualificacoes">
+    <div class="section-inner">
+      <div class="section-head">
+        <p class="eyebrow">O que eu trago</p>
+        <h2>Qualificação Profissional</h2>
+      </div>
+
+      <div class="qual-grid">
+        <div class="qual-card tilt-card">
+          <div class="tilt-inner">
+            <div class="qual-icon" aria-hidden="true">💻</div>
+            <h3>Experiência com o uso de computadores</h3>
+          </div>
+        </div>
+        <div class="qual-card tilt-card">
+          <div class="tilt-inner">
+            <div class="qual-icon" aria-hidden="true">📊</div>
+            <h3>Office Intermediário</h3>
+          </div>
+        </div>
+        <div class="qual-card tilt-card">
+          <div class="tilt-inner">
+            <div class="qual-icon" aria-hidden="true">🛠️</div>
+            <h3>Softwares e Hardwares</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="knowledge-block">
+        <div class="knowledge-header">
+          <h3 class="knowledge-title">Conhecimentos</h3>
+          <div class="knowledge-tabs" role="tablist" aria-label="Filtrar conhecimentos por categoria">
+            <button class="k-tab is-active" role="tab" aria-selected="true" data-filter="all">Todos</button>
+            <button class="k-tab" role="tab" aria-selected="false" data-filter="fundamentos">Sistemas &amp; Fundamentos</button>
+            <button class="k-tab" role="tab" aria-selected="false" data-filter="produtividade">Produtividade</button>
+            <button class="k-tab" role="tab" aria-selected="false" data-filter="criacao">Criação &amp; Suporte</button>
+            <button class="k-tab" role="tab" aria-selected="false" data-filter="gestao">Gestão</button>
+          </div>
+        </div>
+        <div class="knowledge-grid" id="knowledgeGrid">
+          <span class="knowledge-badge" data-cat="fundamentos">Windows</span>
+          <span class="knowledge-badge" data-cat="fundamentos">Lógica de programação</span>
+          <span class="knowledge-badge" data-cat="fundamentos">Internet</span>
+          <span class="knowledge-badge" data-cat="produtividade">Excel</span>
+          <span class="knowledge-badge" data-cat="produtividade">Word</span>
+          <span class="knowledge-badge" data-cat="produtividade">Access</span>
+          <span class="knowledge-badge" data-cat="produtividade">PowerPoint</span>
+          <span class="knowledge-badge" data-cat="criacao">Manutenção Preventiva</span>
+          <span class="knowledge-badge" data-cat="criacao">Photoshop</span>
+          <span class="knowledge-badge" data-cat="criacao">CorelDraw</span>
+          <span class="knowledge-badge" data-cat="gestao">Liderança e gestão de pessoas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CURSOS ===================== -->
+  <section class="section section-surface" id="cursos">
+    <div class="section-inner">
+      <div class="section-head">
+        <p class="eyebrow">Aperfeiçoamento contínuo</p>
+        <h2>Cursos de Aperfeiçoamento</h2>
+      </div>
+
+      <div class="courses-grid">
+        <div class="course-card tilt-card">
+          <div class="tilt-inner">
+            <span class="course-tag status-progress">Em andamento</span>
+            <h3>Inglês</h3>
+            <p>Wizard</p>
+          </div>
+        </div>
+        <div class="course-card tilt-card">
+          <div class="tilt-inner">
+            <span class="course-tag">Carga horária</span>
+            <h3>Marketing Pessoal</h3>
+            <p class="course-counter"><span class="counter" data-count="234">0</span> horas</p>
+          </div>
+        </div>
+        <div class="course-card tilt-card">
+          <div class="tilt-inner">
+            <span class="course-tag">Carga horária</span>
+            <h3>Informática Master</h3>
+            <p class="course-counter"><span class="counter" data-count="216">0</span> horas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EXPERIÊNCIA ===================== -->
+  <section class="section section-console" id="experiencia">
+    <canvas id="networkCanvasDark" class="network-canvas" aria-hidden="true"></canvas>
+    <div class="section-inner">
+      <div class="section-head">
+        <p class="eyebrow eyebrow-light">Onde já atuei</p>
+        <h2 class="light-heading">Experiência Profissional</h2>
+      </div>
+
+      <div class="exp-tabs">
+        <div class="exp-tablist" role="tablist" aria-label="Empresas">
+          <button class="exp-tab is-active" role="tab" aria-selected="true" aria-controls="exp-panel-1" id="exp-tab-1" data-target="exp-panel-1">
+            <span class="exp-tab-index">01</span>
+            <span>Instituto Avanço Tecnologia</span>
+          </button>
+          <button class="exp-tab" role="tab" aria-selected="false" aria-controls="exp-panel-2" id="exp-tab-2" data-target="exp-panel-2">
+            <span class="exp-tab-index">02</span>
+            <span>CSU CardSystem</span>
+          </button>
+        </div>
+
+        <div class="exp-panels">
+          <div class="exp-panel is-active" role="tabpanel" id="exp-panel-1" aria-labelledby="exp-tab-1">
+            <span class="timeline-status status-progress">Estagiário · 4 meses</span>
+            <h3>Instituto Avanço Tecnologia</h3>
+            <ul class="activity-list">
+              <li>Montagem de art's</li>
+              <li>Criação de conteúdo</li>
+              <li>Manutenção preventiva</li>
+              <li>Acompanhamento de aula</li>
+              <li>Montagem de computadores</li>
+              <li>Rotinas administrativas</li>
+            </ul>
+          </div>
+          <div class="exp-panel" role="tabpanel" id="exp-panel-2" aria-labelledby="exp-tab-2" hidden>
+            <h3>CSU CardSystem</h3>
+            <ul class="activity-list activity-list-roles">
+              <li>Assistente de BackOffice</li>
+              <li>Operador de Telemarketing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ===================== CONTATO ===================== -->
+<section class="section section-contact" id="contato">
+  <div class="section-inner">
+    <div class="section-head section-head-light">
+      <p class="eyebrow eyebrow-light">Vamos conversar</p>
+      <h2 class="light-heading">Entre em Contato</h2>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-card magnetic">
+        <a href="tel:+5511954326956" class="contact-main">
+          <div class="contact-icon" aria-hidden="true">📞</div>
+          <span class="contact-label">Telefone</span>
+          <span class="contact-value">(11) 95432-6956</span>
+        </a>
+        <button class="copy-btn" data-copy="(11) 95432-6956" aria-label="Copiar telefone">Copiar</button>
+      </div>
+
+      <div class="contact-card magnetic">
+        <a href="https://wa.me/5511970290233" target="_blank" rel="noopener noreferrer" class="contact-main">
+          <div class="contact-icon" aria-hidden="true">💬</div>
+          <span class="contact-label">WhatsApp</span>
+          <span class="contact-value">(11) 97029-0233</span>
+        </a>
+        <button class="copy-btn" data-copy="(11) 97029-0233" aria-label="Copiar WhatsApp">Copiar</button>
+      </div>
+
+      <div class="contact-card magnetic">
+        <a href="mailto:albertdias80@gmail.com" class="contact-main">
+          <div class="contact-icon" aria-hidden="true">✉️</div>
+          <span class="contact-label">E-mail</span>
+          <span class="contact-value">albertdias80@gmail.com</span>
+        </a>
+        <button class="copy-btn" data-copy="albertdias80@gmail.com" aria-label="Copiar e-mail">Copiar</button>
+      </div>
+
+      <!-- LinkedIn - AGORA DENTRO DO GRID com a mesma estrutura -->
+      <div class="contact-card magnetic">
+        <a href="https://www.linkedin.com/in/albert-nunes-10022230b/" target="_blank" rel="noopener noreferrer" class="contact-main">
+          <div class="contact-icon" aria-hidden="true">🔗</div>
+          <span class="contact-label">LinkedIn</span>
+          <span class="contact-value">/in/albert-nunes-10022230b</span>
+        </a>
+        <button class="copy-btn" data-copy="https://www.linkedin.com/in/albert-nunes-10022230b/" aria-label="Copiar link do LinkedIn">Copiar</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark"><img src="brand-icon.png" alt=""></span>
+      <div>
+        <strong>Albert Nunes Dias</strong>
+        <p>Gestão da Tecnologia da Informação</p>
+      </div>
+    </div>
+    <div class="footer-contact">
+      <a href="mailto:albertdias80@gmail.com">albertdias80@gmail.com</a>
+      <a href="tel:+5511954326956">(11) 95432-6956</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; <span id="year"></span> Albert Nunes Dias - Tecnólogo em Andamento. </p>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+  <svg class="progress-ring" viewBox="0 0 44 44" aria-hidden="true">
+    <circle class="progress-ring-bg" cx="22" cy="22" r="19"></circle>
+    <circle class="progress-ring-fill" id="progressRingFill" cx="22" cy="22" r="19"></circle>
+  </svg>
+  <span aria-hidden="true">↑</span>
+</button>
+
+<script src="script.js"></script>
+</body>
+</html>
