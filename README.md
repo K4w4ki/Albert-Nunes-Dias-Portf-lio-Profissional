@@ -1,7 +1,7 @@
 # 👨‍💻 Albert Nunes Dias — Portfólio
 
 <p align="center">
-  <img src="public/photo.png" alt="Foto de Albert Nunes Dias" width="180" style="border-radius: 50%;">
+  <img src="photo.png" alt="Foto de Albert Nunes Dias" width="180" style="border-radius: 50%;">
 </p>
 
 <h3 align="center">
