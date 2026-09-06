@@ -446,7 +446,7 @@
     // REVELAR SEÇÕES AO ROLAR
     // =========================================================
     const revealTargets = document.querySelectorAll(
-      '.info-card, .timeline-item, .qual-card, .course-card, .contact-card, .objective-panel, .knowledge-block, .section-head, .exp-tabs'
+      '.info-card, .timeline-item, .qual-card, .course-card, .contact-card, .objective-panel, .knowledge-block, .section-head, .exp-tabs, .project-card'
     );
     revealTargets.forEach((el) => el.classList.add('reveal'));
 
