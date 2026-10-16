@@ -55,9 +55,20 @@ html {
   scroll-padding-top: calc(var(--header-h) + 12px);
 }
 
+/* =========================================================
+   FORÇAR ANIMAÇÕES — ignora prefers-reduced-motion
+   Mantém scroll-behavior: smooth mesmo se o SO pedir "reduce"
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  html {
+    scroll-behavior: smooth !important;
+  }
+  *, *::before, *::after {
+    animation-duration: revert !important;
+    animation-iteration-count: revert !important;
+    transition-duration: revert !important;
+    scroll-behavior: revert !important;
+  }
 }
 
 body {
@@ -1144,8 +1155,14 @@ button { font-family: inherit; }
   }
 }
 
+/* CORRIGIDO: força as animações dos bg-icons mesmo em reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .bg-icon { animation: none; opacity: 0.12; }
+  .bg-icon {
+    animation:
+      icon-float 9s ease-in-out infinite,
+      icon-pulse 6s ease-in-out infinite !important;
+    opacity: 0.14;
+  }
 }
 
 .section-contact { color: #fff; }
