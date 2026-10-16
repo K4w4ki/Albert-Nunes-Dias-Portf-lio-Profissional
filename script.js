@@ -2,40 +2,9 @@
 // Albert Nunes Dias — Portfólio Profissional (interativo)
 // =============================================================
 
-// ============================================================
-// FORÇA ANIMAÇÕES — sobrescreve matchMedia ANTES de qualquer
-// outro script rodar, pra que libs/checks não vejam "reduce"
-// ============================================================
-(function forcarAnimacoes() {
-  const original = window.matchMedia.bind(window);
-  window.matchMedia = function (query) {
-    if (query && query.includes('prefers-reduced-motion')) {
-      // Retorna um objeto fake dizendo que NÃO prefere redução
-      return {
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: () => {},
-        removeListener: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-        dispatchEvent: () => false,
-      };
-    }
-    return original(query);
-  };
-
-  // Garante que o boot loader suma mesmo se algo travar
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      document.querySelector('.boot-loader')?.classList.add('hidden');
-      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
-    }, 2500);
-  });
-})();
-
 (() => {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // FORÇADO: ignora prefers-reduced-motion e roda tudo
+  const reduceMotion = false;
 
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -202,7 +171,7 @@
       let mouse = { x: null, y: null };
       let visible = true;
 
-      const DENSITY = 14000; // px² por partícula
+      const DENSITY = 14000;
       const LINK_DIST = 130;
 
       function resize() {
@@ -316,60 +285,53 @@
         let currentY = 0;
         let targetX = 0;
         let targetY = 0;
-        
-        // Anima suavemente usando requestAnimationFrame
+
         function animate() {
-          // Interpolação linear para movimento suave
           currentX += (targetX - currentX) * 0.15;
           currentY += (targetY - currentY) * 0.15;
-          
-          // Se a diferença for muito pequena, arredonda para evitar micro-vibrações
+
           if (Math.abs(currentX - targetX) < 0.01 && Math.abs(currentY - targetY) < 0.01) {
             currentX = targetX;
             currentY = targetY;
           }
-          
+
           el.style.transform = `translate(${currentX}px, ${currentY}px)`;
-          
-          // Continua animando enquanto houver diferença significativa
+
           if (Math.abs(currentX - targetX) > 0.01 || Math.abs(currentY - targetY) > 0.01) {
             rafId = requestAnimationFrame(animate);
           } else {
             rafId = null;
           }
         }
-        
+
         el.addEventListener('mousemove', (e) => {
           const rect = el.getBoundingClientRect();
-          // Calcula o deslocamento baseado na posição do mouse dentro do elemento
           const x = e.clientX - rect.left - rect.width / 2;
           const y = e.clientY - rect.top - rect.height / 2;
-          
-          // Limita o deslocamento máximo para evitar que o card saia muito do lugar
+
           const maxOffset = 12;
           const offsetX = Math.max(-maxOffset, Math.min(maxOffset, x * 0.15));
           const offsetY = Math.max(-maxOffset, Math.min(maxOffset, y * 0.15));
-          
+
           targetX = offsetX;
           targetY = offsetY;
-          
-          // Inicia a animação se não estiver rodando
+
           if (!rafId) {
             rafId = requestAnimationFrame(animate);
           }
         });
-        
+
         el.addEventListener('mouseleave', () => {
-          // Volta à posição original suavemente
           targetX = 0;
           targetY = 0;
-          
+
           if (!rafId) {
             rafId = requestAnimationFrame(animate);
           }
         });
       });
     }
+
     // =========================================================
     // CONTADORES ANIMADOS (cursos)
     // =========================================================
@@ -462,7 +424,7 @@
         try {
           await navigator.clipboard.writeText(value);
         } catch (e) {
-          // Fallback silencioso caso a API de clipboard não esteja disponível
+          // Fallback silencioso
         }
         const original = btn.textContent;
         btn.textContent = 'Copiado!';
