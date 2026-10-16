@@ -2,6 +2,38 @@
 // Albert Nunes Dias — Portfólio Profissional (interativo)
 // =============================================================
 
+// ============================================================
+// FORÇA ANIMAÇÕES — sobrescreve matchMedia ANTES de qualquer
+// outro script rodar, pra que libs/checks não vejam "reduce"
+// ============================================================
+(function forcarAnimacoes() {
+  const original = window.matchMedia.bind(window);
+  window.matchMedia = function (query) {
+    if (query && query.includes('prefers-reduced-motion')) {
+      // Retorna um objeto fake dizendo que NÃO prefere redução
+      return {
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      };
+    }
+    return original(query);
+  };
+
+  // Garante que o boot loader suma mesmo se algo travar
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelector('.boot-loader')?.classList.add('hidden');
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+    }, 2500);
+  });
+})();
+
 (() => {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
