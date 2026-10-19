@@ -1,0 +1,8 @@
+{
+  "name": "albert-portfolio-private-drive",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  }
+}

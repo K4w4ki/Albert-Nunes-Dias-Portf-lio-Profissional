@@ -1,0 +1,23 @@
+/* Integração mínima do botão e do modal da área privada. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.site-header .header-inner .main-nav .vault-trigger{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 34px;padding:0;border:1px solid rgba(143,163,191,.24);border-radius:11px;background:rgba(255,255,255,.035);color:#9bbce8;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease,transform .2s ease}
+.site-header .header-inner .main-nav .vault-trigger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.site-header .header-inner .main-nav .vault-trigger:hover,.site-header .header-inner .main-nav .vault-trigger:focus-visible{color:#ffc98a;border-color:rgba(245,124,0,.65);background:rgba(245,124,0,.09);box-shadow:0 0 18px rgba(245,124,0,.15);transform:translateY(-1px)}
+.vault-dialog{width:min(420px,calc(100vw - 28px));max-width:none;padding:0;color:#e6eef9;background:transparent;border:0;overflow:visible}
+.vault-dialog::backdrop{background:rgba(2,7,18,.78);backdrop-filter:blur(9px)}
+.vault-dialog-inner{position:relative;padding:32px;border:1px solid rgba(143,163,191,.24);border-radius:22px;background:radial-gradient(440px 220px at 100% 0%,rgba(21,101,192,.19),transparent 70%),linear-gradient(155deg,#101f3b,#071326);box-shadow:0 28px 90px rgba(0,0,0,.56),0 0 36px rgba(21,101,192,.12)}
+.vault-dialog-close{position:absolute;top:12px;right:14px;width:34px;height:34px;border:1px solid rgba(255,255,255,.12);border-radius:50%;background:rgba(255,255,255,.04);color:#9eb0cc;font-size:22px;line-height:1;cursor:pointer}
+.vault-dialog-icon{display:flex;align-items:center;justify-content:center;width:43px;height:43px;margin-bottom:18px;border:1px solid rgba(245,124,0,.3);border-radius:13px;background:rgba(245,124,0,.09);color:#ffb86b}
+.vault-dialog-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.vault-dialog-kicker{margin:0 0 8px!important;color:#ffb86b!important;font:600 .67rem/1.5 'JetBrains Mono',monospace!important;letter-spacing:.16em}
+.vault-dialog-inner h2{margin:0 0 8px;font-size:1.55rem;letter-spacing:-.03em}
+.vault-dialog-copy{margin:0 0 23px!important;color:#9eafca!important;font-size:.9rem}
+.vault-dialog-inner label{display:block;margin-bottom:8px;color:#cbd8ee;font-size:.8rem;font-weight:600}
+.vault-dialog-inner input{width:100%;padding:13px 14px;border:1px solid rgba(143,163,191,.28);border-radius:11px;outline:none;background:rgba(2,8,21,.68);color:#fff;font:500 .94rem 'Inter',sans-serif;transition:border-color .2s ease,box-shadow .2s ease}
+.vault-dialog-inner input:focus{border-color:#4d8fe2;box-shadow:0 0 0 3px rgba(21,101,192,.18)}
+.vault-dialog-submit{display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:16px;padding:12px 16px;border:1px solid rgba(255,184,107,.38);border-radius:11px;background:linear-gradient(100deg,#db6a00,#f57c00);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(245,124,0,.18)}
+.vault-dialog-submit:disabled{opacity:.65;cursor:wait}
+.vault-dialog-error{margin:12px 0 0!important;padding:10px 12px;border:1px solid rgba(248,113,113,.3);border-radius:9px;background:rgba(127,29,29,.18);color:#fecaca!important;font-size:.82rem}
+.vault-dialog-note{display:flex;align-items:center;gap:8px;margin:18px 0 0!important;color:#7488a8!important;font:500 .7rem 'JetBrains Mono',monospace!important}
+.vault-dialog-note span{font-size:.55rem;color:#62d99b}
+@media(max-width:760px){.site-header .header-inner .main-nav .vault-trigger{width:100%;height:42px;flex-basis:auto;justify-content:flex-start;padding:0 4px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;box-shadow:none;color:var(--text)}.site-header .header-inner .main-nav .vault-trigger::after{content:'Área privada';margin-left:9px;font-size:.92rem;font-weight:500}.vault-dialog-inner{padding:26px 22px}}
