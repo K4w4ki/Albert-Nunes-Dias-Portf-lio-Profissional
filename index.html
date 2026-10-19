@@ -25,6 +25,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="access.css">
 </head>
 <body>
 
@@ -57,6 +58,10 @@
       <a href="#cursos">Cursos</a>
       <a href="#experiencia">Experiência</a>
       <a href="#projetos">Projetos</a>
+      <button class="vault-trigger" id="vaultTrigger" type="button" aria-label="Abrir área privada" title="Área privada" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2.5"/></svg>
+        <span class="sr-only">Área privada</span>
+      </button>
       <a href="#contato" class="nav-cta">Contato</a>
     </nav>
 
@@ -556,6 +561,25 @@
   <span aria-hidden="true">↑</span>
 </button>
 
+<!-- Acesso à área privada: a senha é validada no backend, nunca neste HTML. -->
+<dialog class="vault-dialog" id="vaultDialog" aria-labelledby="vaultDialogTitle">
+  <form class="vault-dialog-inner" id="vaultLoginForm">
+    <button class="vault-dialog-close" id="vaultDialogClose" type="button" aria-label="Fechar janela">×</button>
+    <span class="vault-dialog-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+    </span>
+    <p class="vault-dialog-kicker">ACESSO RESTRITO</p>
+    <h2 id="vaultDialogTitle">Central privada</h2>
+    <p class="vault-dialog-copy">Insira sua senha para acessar o arquivo pessoal.</p>
+    <label for="vaultPassword">Senha de acesso</label>
+    <input id="vaultPassword" name="password" type="password" autocomplete="current-password" required maxlength="512" placeholder="Digite sua senha">
+    <p class="vault-dialog-error" id="vaultLoginError" role="alert" hidden></p>
+    <button class="vault-dialog-submit" id="vaultLoginSubmit" type="submit">Desbloquear <span aria-hidden="true">↗</span></button>
+    <p class="vault-dialog-note"><span aria-hidden="true">●</span> Autenticação protegida no servidor</p>
+  </form>
+</dialog>
+
 <script src="script.js"></script>
+<script src="access.js" defer></script>
 </body>
 </html>
