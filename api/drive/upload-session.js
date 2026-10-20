@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     if (!Number.isSafeInteger(size) || size < 0 || size > MAX_FILE_SIZE) throw new AppError('Tamanho de arquivo inválido ou acima do limite do Google Drive.', 400, 'INVALID_FILE_SIZE');
 
     const accessToken = await getAccessToken();
-    const uploadUrl = await beginResumableUpload({ name, mimeType, size }, accessToken);
+    const uploadUrl = await beginResumableUpload({ name, mimeType, size }, accessToken, req.headers.origin);
     return sendJson(res, 200, { uploadUrl, name });
   } catch (error) {
     return sendJson(res, error.status || 502, { error: error.message || 'Não foi possível preparar o envio.', code: error.code || 'UPLOAD_INIT_FAILED' });
