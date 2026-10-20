@@ -304,7 +304,9 @@
   if (canvas && context) {
     let stars = [];
     let raf = null;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Forçado para false: a página privada mantém suas animações próprias mesmo
+    // com "Mostrar animações" desativado no Windows (ver privado.css).
+    const reducedMotion = false;
     function resizeStars() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.floor(window.innerWidth * dpr);
