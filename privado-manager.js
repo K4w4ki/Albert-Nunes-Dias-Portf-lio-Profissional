@@ -2,13 +2,13 @@
   'use strict';
 
   const list = document.querySelector('#fileList');
-  const workspace = document.querySelector('#workspace');
-  if (!list || !workspace) return;
+  if (!list || !document.querySelector('#workspace')) return;
 
   const selected = new Set();
   let sortKey = 'name';
   let sortDirection = 1;
   let busy = false;
+  let observerScheduled = false;
 
   const request = async (url, options = {}) => {
     const response = await fetch(url, {
@@ -23,12 +23,11 @@
   };
 
   const notify = (message, error = false) => {
-    const messageEl = document.querySelector('#workspaceMessage');
-    if (messageEl) {
-      messageEl.textContent = message;
-      messageEl.hidden = false;
-      messageEl.classList.toggle('is-error', error);
-    }
+    const el = document.querySelector('#workspaceMessage');
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = !message;
+    el.classList.toggle('is-error', error);
   };
 
   const getId = (row) => {
@@ -37,21 +36,19 @@
     try { return new URL(link.href, location.origin).searchParams.get('id') || ''; }
     catch { return ''; }
   };
-
   const getName = (row) => row.querySelector('.file-name')?.textContent?.trim() || '';
   const getSize = (row) => {
     const text = row.querySelector('.file-size')?.textContent || '';
     const match = text.match(/([\d.,]+)\s*(bytes|KB|MB|GB|TB)/i);
     if (!match) return 0;
-    const n = Number(match[1].replace(/\./g, '').replace(',', '.'));
+    const number = Number(match[1].replace(/\./g, '').replace(',', '.'));
     const units = { bytes: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3, TB: 1024 ** 4 };
-    return n * (units[match[2]] || 1);
+    return number * (units[match[2]] || 1);
   };
-
   const getDate = (row) => {
-    const time = row.querySelector('time');
-    const parsed = time?.dateTime ? Date.parse(time.dateTime) : Date.parse(time?.textContent || '');
-    return Number.isFinite(parsed) ? parsed : 0;
+    const el = row.querySelector('time');
+    const date = el?.dateTime ? Date.parse(el.dateTime) : Date.parse(el?.textContent || '');
+    return Number.isFinite(date) ? date : 0;
   };
 
   function makeToolbar() {
@@ -81,8 +78,7 @@
         </div>
       </div>`;
     const head = document.querySelector('.file-list-head');
-    if (head) head.insertAdjacentElement('beforebegin', toolbar);
-    else list.insertAdjacentElement('beforebegin', toolbar);
+    (head || list).insertAdjacentElement('beforebegin', toolbar);
 
     toolbar.querySelector('#vaultSelectAll').addEventListener('change', (event) => {
       const checked = event.target.checked;
@@ -115,25 +111,29 @@
     const rows = [...list.querySelectorAll('.file-row[data-vault-id]')];
     const visibleIds = rows.map((row) => row.dataset.vaultId);
     const visibleSelected = visibleIds.filter((id) => selected.has(id)).length;
-    const count = selected.size;
-    toolbar.querySelector('#vaultSelectionCount').textContent = `${count} selecionado${count === 1 ? '' : 's'}`;
-    toolbar.querySelector('#vaultSelectAll').checked = rows.length > 0 && visibleSelected === rows.length;
-    toolbar.querySelector('#vaultSelectAll').indeterminate = visibleSelected > 0 && visibleSelected < rows.length;
-    for (const id of ['vaultBulkRename', 'vaultBulkCopy', 'vaultBulkDelete']) {
-      toolbar.querySelector(`#${id}`).disabled = busy || count !== 1 && id === 'vaultBulkRename' || count === 0;
-    }
+    toolbar.querySelector('#vaultSelectionCount').textContent =
+      `${selected.size} selecionado${selected.size === 1 ? '' : 's'}`;
+    const all = toolbar.querySelector('#vaultSelectAll');
+    all.checked = rows.length > 0 && visibleSelected === rows.length;
+    all.indeterminate = visibleSelected > 0 && visibleSelected < rows.length;
+    toolbar.querySelector('#vaultBulkRename').disabled = busy || selected.size !== 1;
+    toolbar.querySelector('#vaultBulkCopy').disabled = busy || selected.size === 0;
+    toolbar.querySelector('#vaultBulkDelete').disabled = busy || selected.size === 0;
   }
 
   function sortRows() {
+    // Reordering the rows may trigger the observer, but the observer never calls sortRows.
     const rows = [...list.querySelectorAll('.file-row[data-vault-id]')];
     rows.sort((a, b) => {
-      let cmp = 0;
-      if (sortKey === 'size') cmp = getSize(a) - getSize(b);
-      else if (sortKey === 'date') cmp = getDate(a) - getDate(b);
-      else cmp = getName(a).localeCompare(getName(b), 'pt-BR', { sensitivity: 'base' });
-      return cmp * sortDirection;
+      let comparison = 0;
+      if (sortKey === 'size') comparison = getSize(a) - getSize(b);
+      else if (sortKey === 'date') comparison = getDate(a) - getDate(b);
+      else comparison = getName(a).localeCompare(getName(b), 'pt-BR', { sensitivity: 'base' });
+      return comparison * sortDirection;
     });
-    rows.forEach((row) => list.append(row));
+    const fragment = document.createDocumentFragment();
+    rows.forEach((row) => fragment.append(row));
+    list.append(fragment);
   }
 
   async function runAction(action, id, name) {
@@ -147,26 +147,20 @@
   async function bulkAction(action) {
     const ids = [...selected];
     if (!ids.length || busy) return;
-    if (action === 'rename' && ids.length !== 1) {
-      notify('Selecione apenas um arquivo para renomear.', true);
-      return;
-    }
-
     let newName = '';
     if (action === 'rename') {
-      const row = list.querySelector(`.file-row[data-vault-id="${CSS.escape(ids[0])}"]`);
-      const current = getName(row);
-      newName = window.prompt('Digite o novo nome do arquivo:', current);
+      if (ids.length !== 1) return notify('Selecione apenas um arquivo para renomear.', true);
+      const row = [...list.querySelectorAll('.file-row[data-vault-id]')].find((item) => item.dataset.vaultId === ids[0]);
+      newName = window.prompt('Digite o novo nome do arquivo:', getName(row));
       if (newName === null) return;
       newName = newName.trim();
       if (!newName) return notify('O nome não pode ficar vazio.', true);
     }
-
     if (action === 'delete') {
       const message = ids.length === 1
         ? 'Tem certeza de que deseja excluir este arquivo do Google Drive?'
         : `Tem certeza de que deseja excluir ${ids.length} arquivos do Google Drive?`;
-      if (!window.confirm(`${message}\n\nEssa ação move os arquivos para a lixeira do Google Drive.`)) return;
+      if (!window.confirm(`${message}\n\nOs arquivos serão enviados para a lixeira do Google Drive.`)) return;
     }
 
     busy = true;
@@ -175,19 +169,14 @@
     const errors = [];
     try {
       for (const id of ids) {
-        try {
-          await runAction(action, id, newName || undefined);
-          succeeded += 1;
-        } catch (error) {
-          errors.push(error.message || 'Falha na operação');
-        }
+        try { await runAction(action, id, newName || undefined); succeeded += 1; }
+        catch (error) { errors.push(error.message || 'Falha na operação'); }
       }
       selected.clear();
-      notify(errors.length
-        ? `${succeeded} operação(ões) concluída(s); ${errors.length} falharam: ${errors[0]}`
-        : action === 'delete' ? `${succeeded} arquivo(s) enviado(s) para a lixeira.`
-          : action === 'copy' ? `${succeeded} cópia(s) criada(s).`
-            : 'Arquivo renomeado com sucesso.');
+      if (errors.length) notify(`${succeeded} concluída(s); ${errors.length} falharam: ${errors[0]}`, true);
+      else if (action === 'delete') notify(`${succeeded} arquivo(s) enviado(s) para a lixeira.`);
+      else if (action === 'copy') notify(`${succeeded} cópia(s) criada(s).`);
+      else notify('Arquivo renomeado com sucesso.');
       const refresh = document.querySelector('#refreshButton');
       if (refresh) refresh.click();
     } finally {
@@ -197,7 +186,6 @@
   }
 
   function enhanceRows() {
-    makeToolbar();
     list.querySelectorAll('.file-row').forEach((row) => {
       const id = getId(row);
       if (!id) return;
@@ -218,16 +206,33 @@
       }
     });
     updateSelection();
-    sortRows();
+  }
+
+  function scheduleEnhance() {
+    if (observerScheduled) return;
+    observerScheduled = true;
+    queueMicrotask(() => {
+      observerScheduled = false;
+      enhanceRows();
+    });
   }
 
   makeToolbar();
-  const observer = new MutationObserver(() => {
-    enhanceRows();
-    const toolbar = document.querySelector('#vaultManagerToolbar');
-    const hasRows = list.querySelector('.file-row');
-    if (toolbar) toolbar.hidden = !hasRows;
-  });
-  observer.observe(list, { childList: true, subtree: true });
   enhanceRows();
+
+  // Observe only direct list changes. The callback only adds checkboxes and never sorts,
+  // so sorting cannot cause an observer/sort feedback loop.
+  const observer = new MutationObserver(scheduleEnhance);
+  observer.observe(list, { childList: true, subtree: false });
+
+  const toolbar = document.querySelector('#vaultManagerToolbar');
+  if (toolbar) {
+    const syncVisibility = () => {
+      const hasRows = Boolean(list.querySelector('.file-row'));
+      toolbar.hidden = !hasRows;
+    };
+    const visibilityObserver = new MutationObserver(syncVisibility);
+    visibilityObserver.observe(list, { childList: true });
+    syncVisibility();
+  }
 })();
