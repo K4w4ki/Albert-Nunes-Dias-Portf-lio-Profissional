@@ -1436,14 +1436,40 @@ button { font-family: inherit; }
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease, border-color 0.25s ease;
 }
 
-/* botão de contato no header */
+/* botão de contato no header — mesmo estilo do cadeado (vault-trigger) */
 .site-header .header-inner .main-nav .nav-cta {
-  padding: 10px 18px !important;
-  font-size: 1rem !important;
-  background: #F57C00 !important;
-  color: #ffffff !important;
-  border-radius: 999px !important;
-  box-shadow: 0 0 20px rgba(245, 124, 0, 0.4) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  border: 1px solid rgba(143, 163, 191, 0.24);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #9bbce8;
+  box-shadow: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.site-header .header-inner .main-nav .nav-cta svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.site-header .header-inner .main-nav .nav-cta:hover,
+.site-header .header-inner .main-nav .nav-cta:focus-visible {
+  color: #ffc98a;
+  border-color: rgba(245, 124, 0, 0.65);
+  background: rgba(245, 124, 0, 0.09);
+  box-shadow: 0 0 18px rgba(245, 124, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 /* =========================================================
