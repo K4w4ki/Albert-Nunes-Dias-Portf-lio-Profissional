@@ -46,3 +46,111 @@
     height: 16px;
   }
 }
+
+/* =========================================================
+   ANIMAÇÃO DE ENTRADA DO MODAL (vault dialog)
+   ========================================================= */
+
+/* Backdrop fade-in */
+.vault-dialog::backdrop {
+  animation: vault-backdrop-in 0.28s ease both;
+}
+
+/* Painel: entrada com fade + leve subida + scale */
+.vault-dialog[open] .vault-dialog-inner {
+  animation: vault-panel-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Ícone do cadeado: pequeno "pop" com atraso */
+.vault-dialog[open] .vault-dialog-icon {
+  animation: vault-icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s both;
+}
+
+/* Kicker + título + texto: fade com stagger */
+.vault-dialog[open] .vault-dialog-kicker {
+  animation: vault-fade-up 0.4s ease 0.16s both;
+}
+.vault-dialog[open] .vault-dialog-inner h2 {
+  animation: vault-fade-up 0.4s ease 0.20s both;
+}
+.vault-dialog[open] .vault-dialog-copy {
+  animation: vault-fade-up 0.4s ease 0.24s both;
+}
+.vault-dialog[open] label,
+.vault-dialog[open] input {
+  animation: vault-fade-up 0.4s ease 0.28s both;
+}
+.vault-dialog[open] .vault-dialog-submit {
+  animation: vault-fade-up 0.4s ease 0.32s both;
+}
+.vault-dialog[open] .vault-dialog-note {
+  animation: vault-fade-up 0.4s ease 0.38s both;
+}
+
+/* Linha de brilho que percorre a borda superior */
+.vault-dialog-inner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 124, 0, 0.9), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.vault-dialog[open] .vault-dialog-inner::after {
+  animation: vault-scan 1s ease 0.15s both;
+}
+
+@keyframes vault-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes vault-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes vault-icon-pop {
+  0%   { opacity: 0; transform: scale(0.5) rotate(-12deg); }
+  60%  { opacity: 1; transform: scale(1.12) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes vault-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vault-scan {
+  0%   { opacity: 0; left: -30%; }
+  15%  { opacity: 1; }
+  100% { opacity: 0; left: 100%; }
+}
+
+/* Respeita usuários que preferem menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  .vault-dialog::backdrop,
+  .vault-dialog[open] .vault-dialog-inner,
+  .vault-dialog[open] .vault-dialog-icon,
+  .vault-dialog[open] .vault-dialog-kicker,
+  .vault-dialog[open] .vault-dialog-inner h2,
+  .vault-dialog[open] .vault-dialog-copy,
+  .vault-dialog[open] label,
+  .vault-dialog[open] input,
+  .vault-dialog[open] .vault-dialog-submit,
+  .vault-dialog[open] .vault-dialog-note,
+  .vault-dialog[open] .vault-dialog-inner::after {
+    animation: none !important;
+  }
+}
