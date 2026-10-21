@@ -138,19 +138,58 @@
   100% { opacity: 0; left: 100%; }
 }
 
-/* Respeita usuários que preferem menos movimento */
+/* =========================================================
+   FORÇAR ANIMAÇÕES DO MODAL — ignora prefers-reduced-motion
+   Valores concretos com !important vencem o user-agent.
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
-  .vault-dialog::backdrop,
-  .vault-dialog[open] .vault-dialog-inner,
-  .vault-dialog[open] .vault-dialog-icon,
-  .vault-dialog[open] .vault-dialog-kicker,
-  .vault-dialog[open] .vault-dialog-inner h2,
-  .vault-dialog[open] .vault-dialog-copy,
+  .vault-dialog::backdrop {
+    animation: vault-backdrop-in 0.28s ease both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-inner {
+    animation: vault-panel-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-icon {
+    animation: vault-icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-kicker {
+    animation: vault-fade-up 0.4s ease 0.16s both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-inner h2 {
+    animation: vault-fade-up 0.4s ease 0.20s both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-copy {
+    animation: vault-fade-up 0.4s ease 0.24s both !important;
+    animation-play-state: running !important;
+  }
   .vault-dialog[open] label,
-  .vault-dialog[open] input,
-  .vault-dialog[open] .vault-dialog-submit,
-  .vault-dialog[open] .vault-dialog-note,
+  .vault-dialog[open] input {
+    animation: vault-fade-up 0.4s ease 0.28s both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-submit {
+    animation: vault-fade-up 0.4s ease 0.32s both !important;
+    animation-play-state: running !important;
+  }
+  .vault-dialog[open] .vault-dialog-note {
+    animation: vault-fade-up 0.4s ease 0.38s both !important;
+    animation-play-state: running !important;
+  }
   .vault-dialog[open] .vault-dialog-inner::after {
-    animation: none !important;
+    animation: vault-scan 1s ease 0.15s both !important;
+    animation-play-state: running !important;
+  }
+
+  /* Hover do botão da área privada também volta a animar */
+  .site-header .header-inner .main-nav .vault-trigger {
+    transition-duration: 0.2s !important;
+  }
+  .vault-dialog-inner input {
+    transition-duration: 0.2s !important;
   }
 }
