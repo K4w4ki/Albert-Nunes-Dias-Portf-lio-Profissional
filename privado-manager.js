@@ -196,6 +196,23 @@
   // --- Diálogo "Mover para…": navega por pastas e move os itens selecionados
   // para a pasta que estiver aberta no diálogo no momento da confirmação. ---
 
+  // Fecha um <dialog> esperando a animação de saída terminar (classe .is-closing,
+  // ver privado.css), em vez de sumir abruptamente com dialog.close().
+  function closeModal(dialogEl) {
+    if (!dialogEl || !dialogEl.open || dialogEl.classList.contains('is-closing')) return;
+    dialogEl.classList.add('is-closing');
+    const inner = dialogEl.querySelector('.vault-modal-inner');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      dialogEl.classList.remove('is-closing');
+      dialogEl.close();
+    };
+    inner?.addEventListener('animationend', finish, { once: true });
+    window.setTimeout(finish, 200);
+  }
+
   const moveDialog = document.querySelector('#moveDialog');
   const moveBreadcrumbEl = document.querySelector('#moveBreadcrumb');
   const moveListEl = document.querySelector('#moveFolderList');
@@ -278,7 +295,7 @@
         try { await runAction('move', id, undefined, destination.id); succeeded += 1; }
         catch (error) { errors.push(error.message || 'Falha ao mover'); }
       }
-      moveDialog.close();
+      closeModal(moveDialog);
       selected.clear();
       updateSelection();
       if (errors.length) notify(`${succeeded} movido(s); ${errors.length} falharam: ${errors[0]}`, true);
@@ -289,21 +306,42 @@
       moveConfirmButton.textContent = 'Mover para cá';
     }
   });
-  document.querySelector('#moveDialogClose')?.addEventListener('click', () => moveDialog.close());
-  moveDialog?.addEventListener('click', (event) => { if (event.target === moveDialog) moveDialog.close(); });
+  document.querySelector('#moveDialogClose')?.addEventListener('click', () => closeModal(moveDialog));
+  moveDialog?.addEventListener('click', (event) => { if (event.target === moveDialog) closeModal(moveDialog); });
 
   // --- Menu de contexto (clique com o botão direito), igual ao do Explorer ---
 
   const contextMenuEl = document.querySelector('#vaultContextMenu');
 
+  const ICONS = {
+    folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    newFolder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg>',
+    upload: '<svg viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>',
+    refresh: '<svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5a7 7 0 0 0 11.8-2"/></svg>',
+    download: '<svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>',
+    rename: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+    move: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 14l3-3-3-3"/><path d="M8 11h5"/></svg>',
+    copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    delete: '<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>'
+  };
+
+  let contextMenuCloseTimer = null;
+
   function closeContextMenu() {
     if (!contextMenuEl || contextMenuEl.hidden) return;
-    contextMenuEl.hidden = true;
-    contextMenuEl.replaceChildren();
+    window.clearTimeout(contextMenuCloseTimer);
+    contextMenuEl.classList.add('is-closing');
+    contextMenuCloseTimer = window.setTimeout(() => {
+      contextMenuEl.hidden = true;
+      contextMenuEl.classList.remove('is-closing');
+      contextMenuEl.replaceChildren();
+    }, 100);
   }
 
   function openContextMenu(x, y, items) {
     if (!contextMenuEl) return;
+    window.clearTimeout(contextMenuCloseTimer);
+    contextMenuEl.classList.remove('is-closing');
     contextMenuEl.replaceChildren();
     items.forEach((item) => {
       if (item === 'separator') {
@@ -312,7 +350,17 @@
       }
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = item.label;
+      button.setAttribute('role', 'menuitem');
+      if (item.icon) {
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'vault-context-menu-icon';
+        iconSpan.innerHTML = item.icon;
+        button.append(iconSpan);
+      }
+      const label = document.createElement('span');
+      label.className = 'vault-context-menu-label';
+      label.textContent = item.label;
+      button.append(label);
       if (item.danger) button.classList.add('is-danger');
       if (item.disabled) button.disabled = true;
       button.addEventListener('click', () => {
@@ -324,9 +372,18 @@
     contextMenuEl.style.left = '0px';
     contextMenuEl.style.top = '0px';
     contextMenuEl.hidden = false;
+    // Reinicia a animação de entrada mesmo se o menu já estava visível em
+    // outro lugar (clique direito seguido de outro, sem fechar antes).
+    contextMenuEl.style.animation = 'none';
+    void contextMenuEl.offsetWidth;
+    contextMenuEl.style.animation = '';
     const rect = contextMenuEl.getBoundingClientRect();
     const left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8));
     const top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8));
+    // A animação "cresce" a partir do canto mais próximo do clique, em vez de
+    // sempre do canto superior esquerdo — fica mais natural quando o menu
+    // precisa abrir pra cima ou pra esquerda por falta de espaço na tela.
+    contextMenuEl.style.transformOrigin = `${left < x ? 'right' : 'left'} ${top < y ? 'bottom' : 'top'}`;
     contextMenuEl.style.left = `${left}px`;
     contextMenuEl.style.top = `${top}px`;
   }
@@ -340,10 +397,10 @@
 
   function showEmptyContextMenu(x, y) {
     openContextMenu(x, y, [
-      { label: '📁  Nova pasta', onSelect: () => window.vaultWorkspace?.openNewFolderDialog() },
-      { label: '⬆️  Enviar arquivos', onSelect: () => window.vaultWorkspace?.openUploadPicker() },
+      { label: 'Nova pasta', icon: ICONS.newFolder, onSelect: () => window.vaultWorkspace?.openNewFolderDialog() },
+      { label: 'Enviar arquivos', icon: ICONS.upload, onSelect: () => window.vaultWorkspace?.openUploadPicker() },
       'separator',
-      { label: '⟳  Atualizar', onSelect: () => window.vaultWorkspace?.refresh() }
+      { label: 'Atualizar', icon: ICONS.refresh, onSelect: () => window.vaultWorkspace?.refresh() }
     ]);
   }
 
@@ -355,15 +412,15 @@
     const items = [];
     if (single) {
       items.push(isFolderRow(single)
-        ? { label: '📂  Abrir', onSelect: () => single.querySelector('.file-action')?.click() }
-        : { label: '⬇️  Baixar', onSelect: () => single.querySelector('.file-action')?.click() });
+        ? { label: 'Abrir', icon: ICONS.folder, onSelect: () => single.querySelector('.file-action')?.click() }
+        : { label: 'Baixar', icon: ICONS.download, onSelect: () => single.querySelector('.file-action')?.click() });
       items.push('separator');
-      items.push({ label: '✏️  Renomear', onSelect: () => bulkAction('rename') });
+      items.push({ label: 'Renomear', icon: ICONS.rename, onSelect: () => bulkAction('rename') });
     }
-    items.push({ label: '➜  Mover', onSelect: () => openMoveDialog([...selected]) });
-    items.push({ label: '⧉  Copiar', disabled: hasFolder, onSelect: () => bulkAction('copy') });
+    items.push({ label: 'Mover', icon: ICONS.move, onSelect: () => openMoveDialog([...selected]) });
+    items.push({ label: 'Copiar', icon: ICONS.copy, disabled: hasFolder, onSelect: () => bulkAction('copy') });
     items.push('separator');
-    items.push({ label: '🗑️  Excluir', danger: true, onSelect: () => bulkAction('delete') });
+    items.push({ label: 'Excluir', icon: ICONS.delete, danger: true, onSelect: () => bulkAction('delete') });
     openContextMenu(x, y, items);
   }
 

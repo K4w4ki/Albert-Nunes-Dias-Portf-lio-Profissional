@@ -54,6 +54,23 @@
     workspaceMessage.hidden = !message;
   }
 
+  // Fecha um <dialog> esperando a animação de saída terminar (classe .is-closing,
+  // ver privado.css), em vez de sumir abruptamente com dialog.close().
+  function closeModal(dialogEl) {
+    if (!dialogEl || !dialogEl.open || dialogEl.classList.contains('is-closing')) return;
+    dialogEl.classList.add('is-closing');
+    const inner = dialogEl.querySelector('.vault-modal-inner');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      dialogEl.classList.remove('is-closing');
+      dialogEl.close();
+    };
+    inner?.addEventListener('animationend', finish, { once: true });
+    window.setTimeout(finish, 200);
+  }
+
   function showToast(message) {
     const toast = $('#toast');
     toast.textContent = message;
@@ -361,9 +378,9 @@
   }
 
   newFolderButton.addEventListener('click', openNewFolderDialog);
-  $('#newFolderDialogClose')?.addEventListener('click', () => newFolderDialog.close());
+  $('#newFolderDialogClose')?.addEventListener('click', () => closeModal(newFolderDialog));
   newFolderDialog.addEventListener('click', (event) => {
-    if (event.target === newFolderDialog) newFolderDialog.close();
+    if (event.target === newFolderDialog) closeModal(newFolderDialog);
   });
 
   newFolderForm.addEventListener('submit', async (event) => {
@@ -379,7 +396,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'create-folder', name: trimmed, parentId: currentFolderId })
       });
-      newFolderDialog.close();
+      closeModal(newFolderDialog);
       setWorkspaceMessage('Pasta criada com sucesso.');
       await loadFiles();
     } catch (error) {
