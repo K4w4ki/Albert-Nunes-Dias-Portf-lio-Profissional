@@ -59,7 +59,11 @@
       <div class="workspace-head">
         <div>
           <h2>Arquivos <span class="title-count" id="fileCount">0</span></h2>
-          <nav class="vault-breadcrumb" id="breadcrumb" aria-label="Caminho de pastas"></nav>
+          <div class="vault-nav-row">
+            <button class="icon-button vault-nav-button" id="navBackButton" type="button" aria-label="Voltar" title="Voltar" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <button class="icon-button vault-nav-button" id="navForwardButton" type="button" aria-label="Avançar" title="Avançar" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+            <nav class="vault-breadcrumb" id="breadcrumb" aria-label="Caminho de pastas"></nav>
+          </div>
         </div>
         <div class="workspace-head-actions">
           <button class="secondary-button" id="newFolderButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg> Nova pasta</button>

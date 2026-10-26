@@ -23,6 +23,9 @@
   const newFolderForm = $('#newFolderForm');
   const newFolderNameInput = $('#newFolderNameInput');
   const breadcrumbEl = $('#breadcrumb');
+  const navBackButton = $('#navBackButton');
+  const navForwardButton = $('#navForwardButton');
+  const FOLDER_ICON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
   const FOLDER_MIME = 'application/vnd.google-apps.folder';
   let selectedFiles = [];
   let nextPageToken = null;
@@ -31,6 +34,8 @@
   let rootFolderId = null;
   let currentFolderId = null;
   let breadcrumbPath = []; // [{ id, name }]
+  let navHistory = []; // pilha de breadcrumbPaths visitados (para o botão Voltar)
+  let navFuture = []; // pilha de breadcrumbPaths "desfeitos" (para o botão Avançar)
 
   function showPanel(panel) {
     loginPanel.hidden = panel !== 'login';
@@ -122,12 +127,46 @@
     });
   }
 
+  function updateNavButtons() {
+    navBackButton.disabled = navHistory.length === 0;
+    navForwardButton.disabled = navFuture.length === 0;
+  }
+
   async function openFolder(folderId, folderName, trail) {
+    // Navegação "nova" (clicar numa pasta ou num item do breadcrumb): empilha o
+    // estado atual no histórico e descarta o que havia pra frente, como num navegador.
+    if (breadcrumbPath.length) {
+      navHistory.push(breadcrumbPath);
+      navFuture = [];
+    }
     currentFolderId = folderId;
     breadcrumbPath = trail || [...breadcrumbPath, { id: folderId, name: folderName }];
     renderBreadcrumb();
+    updateNavButtons();
     await loadFiles(false);
   }
+
+  async function goTo(path) {
+    currentFolderId = path[path.length - 1].id;
+    breadcrumbPath = path;
+    renderBreadcrumb();
+    updateNavButtons();
+    await loadFiles(false);
+  }
+
+  navBackButton.addEventListener('click', async () => {
+    if (!navHistory.length) return;
+    const previous = navHistory.pop();
+    navFuture.push(breadcrumbPath);
+    await goTo(previous);
+  });
+
+  navForwardButton.addEventListener('click', async () => {
+    if (!navFuture.length) return;
+    const next = navFuture.pop();
+    navHistory.push(breadcrumbPath);
+    await goTo(next);
+  });
 
   // --- File list rendering ---
 
@@ -142,8 +181,9 @@
     info.className = 'file-info';
     const icon = document.createElement('span');
     icon.className = 'file-type-icon' + (isFolder ? ' is-folder' : '');
-    icon.textContent = isFolder ? 'DIR' : extension(file.name);
     icon.setAttribute('aria-hidden', 'true');
+    if (isFolder) icon.innerHTML = FOLDER_ICON_SVG;
+    else icon.textContent = extension(file.name);
     const nameWrap = document.createElement('div');
     nameWrap.className = 'file-name-wrap';
     const name = document.createElement('strong');
@@ -290,6 +330,9 @@
       showPanel('workspace');
       currentFolderId = null;
       breadcrumbPath = [];
+      navHistory = [];
+      navFuture = [];
+      updateNavButtons();
       await loadFiles();
     } catch (error) {
       showLoginError(error.message || 'Não foi possível entrar.');

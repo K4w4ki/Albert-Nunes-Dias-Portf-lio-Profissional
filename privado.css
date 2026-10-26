@@ -25,7 +25,16 @@
 .file-row.is-folder{cursor:pointer}
 .file-row.is-folder:hover .file-name{color:#fff}
 .file-type-icon.is-folder{border-color:rgba(168,139,255,.3);background:rgba(136,107,230,.12);color:#c0b0ff}
+.file-type-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.file-type-icon.is-folder svg{fill:rgba(168,139,255,.16);stroke-width:1.5}
 button.file-action{border:1px solid rgba(128,160,222,.22);background:rgba(83,122,204,.07)}
+
+.vault-nav-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.vault-nav-row .vault-breadcrumb{margin-top:0}
+.vault-nav-button{width:27px;height:27px;flex:0 0 27px;border-radius:8px}
+.vault-nav-button svg{width:15px;height:15px}
+.vault-nav-button:disabled{opacity:.32;cursor:not-allowed}
+.vault-nav-button:disabled:hover{border-color:var(--line);color:#94a8cb;background:rgba(255,255,255,.025)}
 
 /* Chrome compartilhado pelos diálogos (mover e nova pasta) */
 .vault-modal{width:min(440px,calc(100vw - 28px));max-width:none;padding:0;color:#e6eef9;background:transparent;border:0;overflow:visible}
