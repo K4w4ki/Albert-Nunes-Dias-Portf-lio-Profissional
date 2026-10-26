@@ -80,16 +80,31 @@
     </section>
   </main>
 
-  <dialog class="move-dialog" id="moveDialog">
-    <div class="move-dialog-inner">
-      <button class="move-dialog-close" id="moveDialogClose" type="button" aria-label="Fechar">×</button>
+  <dialog class="vault-modal move-dialog" id="moveDialog">
+    <div class="vault-modal-inner">
+      <button class="vault-modal-close" id="moveDialogClose" type="button" aria-label="Fechar">×</button>
       <h2>Mover para…</h2>
-      <p class="move-dialog-copy">Escolha a pasta de destino.</p>
+      <p class="vault-modal-copy">Escolha a pasta de destino.</p>
       <nav class="vault-breadcrumb move-breadcrumb" id="moveBreadcrumb" aria-label="Caminho de pastas"></nav>
       <div class="move-folder-list" id="moveFolderList"></div>
       <button class="primary-button move-confirm" id="moveConfirm" type="button">Mover para cá</button>
     </div>
   </dialog>
+
+  <dialog class="vault-modal new-folder-dialog" id="newFolderDialog">
+    <div class="vault-modal-inner">
+      <button class="vault-modal-close" id="newFolderDialogClose" type="button" aria-label="Fechar">×</button>
+      <h2>Nova pasta</h2>
+      <p class="vault-modal-copy">Escolha um nome para a nova pasta.</p>
+      <form id="newFolderForm" class="new-folder-form">
+        <label for="newFolderNameInput">Nome da pasta</label>
+        <input id="newFolderNameInput" type="text" maxlength="180" placeholder="Ex.: Documentos" autocomplete="off" required>
+        <button class="primary-button" type="submit">Criar pasta</button>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="vault-context-menu" id="vaultContextMenu" role="menu" hidden></div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>

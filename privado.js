@@ -19,6 +19,9 @@
   const refreshButton = $('#refreshButton');
   const loadMoreButton = $('#loadMoreButton');
   const newFolderButton = $('#newFolderButton');
+  const newFolderDialog = $('#newFolderDialog');
+  const newFolderForm = $('#newFolderForm');
+  const newFolderNameInput = $('#newFolderNameInput');
   const breadcrumbEl = $('#breadcrumb');
   const FOLDER_MIME = 'application/vnd.google-apps.folder';
   let selectedFiles = [];
@@ -308,24 +311,39 @@
   });
   loadMoreButton.addEventListener('click', () => loadFiles(true));
 
-  newFolderButton.addEventListener('click', async () => {
-    const name = window.prompt('Nome da nova pasta:');
-    if (name === null) return;
-    const trimmed = name.trim();
-    if (!trimmed) return setWorkspaceMessage('O nome da pasta não pode ficar vazio.', true);
-    newFolderButton.disabled = true;
+  function openNewFolderDialog() {
+    newFolderForm.reset();
+    newFolderDialog.showModal();
+    window.setTimeout(() => newFolderNameInput.focus(), 30);
+  }
+
+  newFolderButton.addEventListener('click', openNewFolderDialog);
+  $('#newFolderDialogClose')?.addEventListener('click', () => newFolderDialog.close());
+  newFolderDialog.addEventListener('click', (event) => {
+    if (event.target === newFolderDialog) newFolderDialog.close();
+  });
+
+  newFolderForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const trimmed = newFolderNameInput.value.trim();
+    if (!trimmed) return;
+    const submitButton = newFolderForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Criando…';
     try {
       await jsonRequest('/api/drive/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'create-folder', name: trimmed, parentId: currentFolderId })
       });
+      newFolderDialog.close();
       setWorkspaceMessage('Pasta criada com sucesso.');
       await loadFiles();
     } catch (error) {
       setWorkspaceMessage(error.message || 'Não foi possível criar a pasta.', true);
     } finally {
-      newFolderButton.disabled = false;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Criar pasta';
     }
   });
 
@@ -443,11 +461,13 @@
     resizeStars();
   }
 
-  // Exposto para privado-manager.js (toolbar de seleção em massa / mover).
+  // Exposto para privado-manager.js (toolbar de seleção em massa / mover / menu de contexto).
   window.vaultWorkspace = {
     getFolderId: () => currentFolderId,
     getRootId: () => rootFolderId,
-    refresh: () => loadFiles(false)
+    refresh: () => loadFiles(false),
+    openNewFolderDialog,
+    openUploadPicker: () => fileInput.click()
   };
 
   startSession();

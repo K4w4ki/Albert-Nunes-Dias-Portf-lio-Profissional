@@ -292,6 +292,104 @@
   document.querySelector('#moveDialogClose')?.addEventListener('click', () => moveDialog.close());
   moveDialog?.addEventListener('click', (event) => { if (event.target === moveDialog) moveDialog.close(); });
 
+  // --- Menu de contexto (clique com o botão direito), igual ao do Explorer ---
+
+  const contextMenuEl = document.querySelector('#vaultContextMenu');
+
+  function closeContextMenu() {
+    if (!contextMenuEl || contextMenuEl.hidden) return;
+    contextMenuEl.hidden = true;
+    contextMenuEl.replaceChildren();
+  }
+
+  function openContextMenu(x, y, items) {
+    if (!contextMenuEl) return;
+    contextMenuEl.replaceChildren();
+    items.forEach((item) => {
+      if (item === 'separator') {
+        contextMenuEl.append(document.createElement('hr'));
+        return;
+      }
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = item.label;
+      if (item.danger) button.classList.add('is-danger');
+      if (item.disabled) button.disabled = true;
+      button.addEventListener('click', () => {
+        closeContextMenu();
+        item.onSelect?.();
+      });
+      contextMenuEl.append(button);
+    });
+    contextMenuEl.style.left = '0px';
+    contextMenuEl.style.top = '0px';
+    contextMenuEl.hidden = false;
+    const rect = contextMenuEl.getBoundingClientRect();
+    const left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8));
+    const top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8));
+    contextMenuEl.style.left = `${left}px`;
+    contextMenuEl.style.top = `${top}px`;
+  }
+
+  function syncCheckboxesFromSelection() {
+    list.querySelectorAll('.file-row[data-vault-id]').forEach((row) => {
+      const checkbox = row.querySelector('.vault-manager-checkbox');
+      if (checkbox) checkbox.checked = selected.has(row.dataset.vaultId);
+    });
+  }
+
+  function showEmptyContextMenu(x, y) {
+    openContextMenu(x, y, [
+      { label: '📁  Nova pasta', onSelect: () => window.vaultWorkspace?.openNewFolderDialog() },
+      { label: '⬆️  Enviar arquivos', onSelect: () => window.vaultWorkspace?.openUploadPicker() },
+      'separator',
+      { label: '⟳  Atualizar', onSelect: () => window.vaultWorkspace?.refresh() }
+    ]);
+  }
+
+  function showItemContextMenu(x, y) {
+    const rows = [...list.querySelectorAll('.file-row[data-vault-id]')].filter((row) => selected.has(row.dataset.vaultId));
+    if (!rows.length) return;
+    const hasFolder = rows.some(isFolderRow);
+    const single = rows.length === 1 ? rows[0] : null;
+    const items = [];
+    if (single) {
+      items.push(isFolderRow(single)
+        ? { label: '📂  Abrir', onSelect: () => single.querySelector('.file-action')?.click() }
+        : { label: '⬇️  Baixar', onSelect: () => single.querySelector('.file-action')?.click() });
+      items.push('separator');
+      items.push({ label: '✏️  Renomear', onSelect: () => bulkAction('rename') });
+    }
+    items.push({ label: '➜  Mover', onSelect: () => openMoveDialog([...selected]) });
+    items.push({ label: '⧉  Copiar', disabled: hasFolder, onSelect: () => bulkAction('copy') });
+    items.push('separator');
+    items.push({ label: '🗑️  Excluir', danger: true, onSelect: () => bulkAction('delete') });
+    openContextMenu(x, y, items);
+  }
+
+  list.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+    const row = event.target.closest('.file-row[data-vault-id]');
+    if (row) {
+      if (!selected.has(row.dataset.vaultId)) {
+        selected.clear();
+        selected.add(row.dataset.vaultId);
+        syncCheckboxesFromSelection();
+        updateSelection();
+      }
+      showItemContextMenu(event.clientX, event.clientY);
+    } else {
+      showEmptyContextMenu(event.clientX, event.clientY);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (contextMenuEl && !contextMenuEl.hidden && !contextMenuEl.contains(event.target)) closeContextMenu();
+  });
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeContextMenu(); });
+  window.addEventListener('scroll', closeContextMenu, true);
+  window.addEventListener('resize', closeContextMenu);
+
   function enhanceRows() {
     list.querySelectorAll('.file-row').forEach((row) => {
       const id = getId(row);
