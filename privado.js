@@ -18,10 +18,16 @@
   const fileCount = $('#fileCount');
   const refreshButton = $('#refreshButton');
   const loadMoreButton = $('#loadMoreButton');
+  const newFolderButton = $('#newFolderButton');
+  const breadcrumbEl = $('#breadcrumb');
+  const FOLDER_MIME = 'application/vnd.google-apps.folder';
   let selectedFiles = [];
   let nextPageToken = null;
   let loadedCount = 0;
   let toastTimer = null;
+  let rootFolderId = null;
+  let currentFolderId = null;
+  let breadcrumbPath = []; // [{ id, name }]
 
   function showPanel(panel) {
     loginPanel.hidden = panel !== 'login';
@@ -66,7 +72,7 @@
 
   function formatBytes(bytes) {
     const value = Number(bytes);
-    if (!Number.isFinite(value) || value < 0) return 'Tamanho indisponível';
+    if (!Number.isFinite(value) || value < 0) return '—';
     if (value === 0) return '0 bytes';
     const units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
     const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
@@ -86,45 +92,104 @@
     return (match ? match[1] : 'FILE').toUpperCase();
   }
 
+  // --- Breadcrumb ---
+
+  function renderBreadcrumb() {
+    breadcrumbEl.replaceChildren();
+    breadcrumbPath.forEach((crumb, index) => {
+      if (index > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'vault-breadcrumb-sep';
+        sep.textContent = '/';
+        breadcrumbEl.append(sep);
+      }
+      if (index === breadcrumbPath.length - 1) {
+        const current = document.createElement('span');
+        current.className = 'vault-breadcrumb-current';
+        current.textContent = crumb.name;
+        breadcrumbEl.append(current);
+      } else {
+        const link = document.createElement('button');
+        link.type = 'button';
+        link.className = 'vault-breadcrumb-link';
+        link.textContent = crumb.name;
+        link.addEventListener('click', () => openFolder(crumb.id, crumb.name, breadcrumbPath.slice(0, index + 1)));
+        breadcrumbEl.append(link);
+      }
+    });
+  }
+
+  async function openFolder(folderId, folderName, trail) {
+    currentFolderId = folderId;
+    breadcrumbPath = trail || [...breadcrumbPath, { id: folderId, name: folderName }];
+    renderBreadcrumb();
+    await loadFiles(false);
+  }
+
+  // --- File list rendering ---
+
   function renderFile(file) {
+    const isFolder = file.mimeType === FOLDER_MIME;
     const row = document.createElement('article');
-    row.className = 'file-row';
+    row.className = 'file-row' + (isFolder ? ' is-folder' : '');
+    row.dataset.vaultId = file.id;
+    row.dataset.vaultType = isFolder ? 'folder' : 'file';
 
     const info = document.createElement('div');
     info.className = 'file-info';
     const icon = document.createElement('span');
-    icon.className = 'file-type-icon';
-    icon.textContent = extension(file.name);
+    icon.className = 'file-type-icon' + (isFolder ? ' is-folder' : '');
+    icon.textContent = isFolder ? 'DIR' : extension(file.name);
     icon.setAttribute('aria-hidden', 'true');
     const nameWrap = document.createElement('div');
     nameWrap.className = 'file-name-wrap';
     const name = document.createElement('strong');
     name.className = 'file-name';
-    name.textContent = file.name || 'Arquivo sem nome';
+    name.textContent = file.name || (isFolder ? 'Pasta sem nome' : 'Arquivo sem nome');
     name.title = file.name || '';
     const size = document.createElement('small');
     size.className = 'file-size';
-    size.textContent = formatBytes(file.size);
+    size.textContent = isFolder ? 'Pasta' : formatBytes(file.size);
     nameWrap.append(name, size);
     info.append(icon, nameWrap);
 
     const type = document.createElement('span');
     type.className = 'file-type';
-    type.textContent = (file.mimeType || 'application/octet-stream').replace('application/vnd.openxmlformats-officedocument.', '').replace('application/', '').replace('image/', 'imagem/').replace('text/', 'texto/');
-    type.title = file.mimeType || '';
+    type.textContent = isFolder
+      ? 'Pasta'
+      : (file.mimeType || 'application/octet-stream').replace('application/vnd.openxmlformats-officedocument.', '').replace('application/', '').replace('image/', 'imagem/').replace('text/', 'texto/');
+    type.title = isFolder ? '' : (file.mimeType || '');
 
     const date = document.createElement('time');
     date.className = 'file-date';
     date.textContent = prettyDate(file.modifiedTime);
     if (file.modifiedTime) date.dateTime = file.modifiedTime;
 
-    const action = document.createElement('a');
-    action.className = 'file-action';
-    action.href = `/api/drive/download?id=${encodeURIComponent(file.id)}`;
-    action.setAttribute('aria-label', `Baixar ${file.name || 'arquivo'}`);
-    action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg> Baixar';
+    let action;
+    if (isFolder) {
+      action = document.createElement('button');
+      action.type = 'button';
+      action.className = 'file-action';
+      action.textContent = 'Abrir';
+      action.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openFolder(file.id, file.name || 'Pasta');
+      });
+    } else {
+      action = document.createElement('a');
+      action.className = 'file-action';
+      action.href = `/api/drive/download?id=${encodeURIComponent(file.id)}`;
+      action.setAttribute('aria-label', `Baixar ${file.name || 'arquivo'}`);
+      action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg> Baixar';
+    }
 
     row.append(info, type, date, action);
+    if (isFolder) {
+      row.addEventListener('click', (event) => {
+        if (event.target.closest('.file-action') || event.target.closest('.vault-manager-checkbox')) return;
+        openFolder(file.id, file.name || 'Pasta');
+      });
+    }
     return row;
   }
 
@@ -133,9 +198,9 @@
     const empty = document.createElement('div');
     empty.className = 'empty-state';
     const headline = document.createElement('strong');
-    headline.textContent = 'Seu universo ainda está vazio';
+    headline.textContent = 'Esta pasta ainda está vazia';
     const detail = document.createElement('span');
-    detail.textContent = 'Envie o primeiro arquivo para começar.';
+    detail.textContent = 'Envie um arquivo ou crie uma subpasta para começar.';
     empty.append(headline, detail);
     fileList.append(empty);
   }
@@ -151,8 +216,17 @@
       loadMoreButton.textContent = 'Carregando…';
     }
     try {
-      const query = append && nextPageToken ? `?pageToken=${encodeURIComponent(nextPageToken)}` : '';
+      const params = new URLSearchParams();
+      if (append && nextPageToken) params.set('pageToken', nextPageToken);
+      if (currentFolderId) params.set('folderId', currentFolderId);
+      const query = params.toString() ? `?${params.toString()}` : '';
       const result = await jsonRequest(`/api/drive/list${query}`);
+      if (!rootFolderId) rootFolderId = result.folderId;
+      if (!currentFolderId) {
+        currentFolderId = result.folderId;
+        breadcrumbPath = [{ id: rootFolderId, name: 'Meus arquivos' }];
+        renderBreadcrumb();
+      }
       const files = Array.isArray(result.files) ? result.files : [];
       if (!append) fileList.replaceChildren();
       files.forEach((file) => fileList.append(renderFile(file)));
@@ -211,12 +285,14 @@
       });
       passwordInput.value = '';
       showPanel('workspace');
+      currentFolderId = null;
+      breadcrumbPath = [];
       await loadFiles();
     } catch (error) {
       showLoginError(error.message || 'Não foi possível entrar.');
     } finally {
       loginButton.disabled = false;
-      loginButton.innerHTML = 'Entrar na central <span aria-hidden="true">→</span>';
+      loginButton.innerHTML = 'Entrar <span aria-hidden="true">→</span>';
     }
   });
 
@@ -231,6 +307,27 @@
     refreshButton.disabled = false;
   });
   loadMoreButton.addEventListener('click', () => loadFiles(true));
+
+  newFolderButton.addEventListener('click', async () => {
+    const name = window.prompt('Nome da nova pasta:');
+    if (name === null) return;
+    const trimmed = name.trim();
+    if (!trimmed) return setWorkspaceMessage('O nome da pasta não pode ficar vazio.', true);
+    newFolderButton.disabled = true;
+    try {
+      await jsonRequest('/api/drive/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-folder', name: trimmed, parentId: currentFolderId })
+      });
+      setWorkspaceMessage('Pasta criada com sucesso.');
+      await loadFiles();
+    } catch (error) {
+      setWorkspaceMessage(error.message || 'Não foi possível criar a pasta.', true);
+    } finally {
+      newFolderButton.disabled = false;
+    }
+  });
 
   fileInput.addEventListener('change', () => {
     selectedFiles = Array.from(fileInput.files || []);
@@ -272,7 +369,7 @@
         const session = await jsonRequest('/api/drive/upload-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size })
+          body: JSON.stringify({ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size, folderId: currentFolderId })
         });
         await uploadFileToGoogle(session.uploadUrl, file, (fraction) => {
           uploadProgressFill.style.width = `${Math.round(fraction * 100)}%`;
@@ -288,7 +385,7 @@
       uploadButton.innerHTML = 'Enviar <span aria-hidden="true">↑</span>';
       setWorkspaceMessage(`${completed} arquivo(s) enviado(s) com sucesso.`);
       await loadFiles();
-      showToast('Arquivos enviados para a pasta privada.');
+      showToast('Arquivos enviados.');
     } catch (error) {
       setWorkspaceMessage(error.message || 'O envio falhou. Confira a conexão e tente novamente.', true);
       uploadStatus.textContent = 'Envio interrompido';
@@ -298,14 +395,12 @@
     }
   });
 
-  // Canvas de estrelas discreto; respeita a preferência de movimento reduzido.
+  // Canvas de estrelas discreto; roda sempre (ver privado.css para o motivo).
   const canvas = $('#starfield');
   const context = canvas?.getContext('2d');
   if (canvas && context) {
     let stars = [];
     let raf = null;
-    // Forçado para false: a página privada mantém suas animações próprias mesmo
-    // com "Mostrar animações" desativado no Windows (ver privado.css).
     const reducedMotion = false;
     function resizeStars() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -347,6 +442,13 @@
     });
     resizeStars();
   }
+
+  // Exposto para privado-manager.js (toolbar de seleção em massa / mover).
+  window.vaultWorkspace = {
+    getFolderId: () => currentFolderId,
+    getRootId: () => rootFolderId,
+    refresh: () => loadFiles(false)
+  };
 
   startSession();
 })();

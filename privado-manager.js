@@ -30,12 +30,16 @@
     el.classList.toggle('is-error', error);
   };
 
+  // Lê o id de uma linha (arquivo ou pasta). privado.js já grava data-vault-id
+  // em toda linha; o fallback por link de download existe só por segurança.
   const getId = (row) => {
+    if (row.dataset.vaultId) return row.dataset.vaultId;
     const link = row.querySelector('a.file-action[href*="/api/drive/download?id="]');
     if (!link) return '';
     try { return new URL(link.href, location.origin).searchParams.get('id') || ''; }
     catch { return ''; }
   };
+  const isFolderRow = (row) => row.classList.contains('is-folder');
   const getName = (row) => row.querySelector('.file-name')?.textContent?.trim() || '';
   const getSize = (row) => {
     const text = row.querySelector('.file-size')?.textContent || '';
@@ -73,6 +77,7 @@
         <span id="vaultSelectionCount">0 selecionados</span>
         <div class="vault-manager-actions">
           <button id="vaultBulkRename" type="button" disabled>Renomear</button>
+          <button id="vaultBulkMove" type="button" disabled>Mover</button>
           <button id="vaultBulkCopy" type="button" disabled>Copiar</button>
           <button id="vaultBulkDelete" type="button" class="is-danger" disabled>Excluir</button>
         </div>
@@ -103,6 +108,7 @@
     toolbar.querySelector('#vaultBulkRename').addEventListener('click', () => bulkAction('rename'));
     toolbar.querySelector('#vaultBulkCopy').addEventListener('click', () => bulkAction('copy'));
     toolbar.querySelector('#vaultBulkDelete').addEventListener('click', () => bulkAction('delete'));
+    toolbar.querySelector('#vaultBulkMove').addEventListener('click', () => openMoveDialog([...selected]));
   }
 
   function updateSelection() {
@@ -111,13 +117,16 @@
     const rows = [...list.querySelectorAll('.file-row[data-vault-id]')];
     const visibleIds = rows.map((row) => row.dataset.vaultId);
     const visibleSelected = visibleIds.filter((id) => selected.has(id)).length;
+    const selectedRows = rows.filter((row) => selected.has(row.dataset.vaultId));
+    const hasFolder = selectedRows.some(isFolderRow);
     toolbar.querySelector('#vaultSelectionCount').textContent =
       `${selected.size} selecionado${selected.size === 1 ? '' : 's'}`;
     const all = toolbar.querySelector('#vaultSelectAll');
     all.checked = rows.length > 0 && visibleSelected === rows.length;
     all.indeterminate = visibleSelected > 0 && visibleSelected < rows.length;
     toolbar.querySelector('#vaultBulkRename').disabled = busy || selected.size !== 1;
-    toolbar.querySelector('#vaultBulkCopy').disabled = busy || selected.size === 0;
+    toolbar.querySelector('#vaultBulkMove').disabled = busy || selected.size === 0;
+    toolbar.querySelector('#vaultBulkCopy').disabled = busy || selected.size === 0 || hasFolder;
     toolbar.querySelector('#vaultBulkDelete').disabled = busy || selected.size === 0;
   }
 
@@ -136,11 +145,11 @@
     list.append(fragment);
   }
 
-  async function runAction(action, id, name) {
+  async function runAction(action, id, name, destinationId) {
     return request('/api/drive/manage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, id, ...(name ? { name } : {}) })
+      body: JSON.stringify({ action, id, ...(name ? { name } : {}), ...(destinationId !== undefined ? { destinationId } : {}) })
     });
   }
 
@@ -149,18 +158,18 @@
     if (!ids.length || busy) return;
     let newName = '';
     if (action === 'rename') {
-      if (ids.length !== 1) return notify('Selecione apenas um arquivo para renomear.', true);
+      if (ids.length !== 1) return notify('Selecione apenas um item para renomear.', true);
       const row = [...list.querySelectorAll('.file-row[data-vault-id]')].find((item) => item.dataset.vaultId === ids[0]);
-      newName = window.prompt('Digite o novo nome do arquivo:', getName(row));
+      newName = window.prompt('Digite o novo nome:', getName(row));
       if (newName === null) return;
       newName = newName.trim();
       if (!newName) return notify('O nome não pode ficar vazio.', true);
     }
     if (action === 'delete') {
       const message = ids.length === 1
-        ? 'Tem certeza de que deseja excluir este arquivo do Google Drive?'
-        : `Tem certeza de que deseja excluir ${ids.length} arquivos do Google Drive?`;
-      if (!window.confirm(`${message}\n\nOs arquivos serão enviados para a lixeira do Google Drive.`)) return;
+        ? 'Tem certeza de que deseja excluir este item do Google Drive?'
+        : `Tem certeza de que deseja excluir ${ids.length} itens do Google Drive?`;
+      if (!window.confirm(`${message}\n\nPastas são excluídas com todo o conteúdo. Os itens serão enviados para a lixeira do Google Drive.`)) return;
     }
 
     busy = true;
@@ -174,16 +183,114 @@
       }
       selected.clear();
       if (errors.length) notify(`${succeeded} concluída(s); ${errors.length} falharam: ${errors[0]}`, true);
-      else if (action === 'delete') notify(`${succeeded} arquivo(s) enviado(s) para a lixeira.`);
+      else if (action === 'delete') notify(`${succeeded} item(ns) enviado(s) para a lixeira.`);
       else if (action === 'copy') notify(`${succeeded} cópia(s) criada(s).`);
-      else notify('Arquivo renomeado com sucesso.');
-      const refresh = document.querySelector('#refreshButton');
-      if (refresh) refresh.click();
+      else notify('Item renomeado com sucesso.');
+      window.vaultWorkspace?.refresh();
     } finally {
       busy = false;
       updateSelection();
     }
   }
+
+  // --- Diálogo "Mover para…": navega por pastas e move os itens selecionados
+  // para a pasta que estiver aberta no diálogo no momento da confirmação. ---
+
+  const moveDialog = document.querySelector('#moveDialog');
+  const moveBreadcrumbEl = document.querySelector('#moveBreadcrumb');
+  const moveListEl = document.querySelector('#moveFolderList');
+  const moveConfirmButton = document.querySelector('#moveConfirm');
+  let moveIds = [];
+  let moveTrail = [];
+
+  async function openMoveDialog(ids) {
+    if (!ids.length || !moveDialog) return;
+    moveIds = ids;
+    moveTrail = [{ id: '', name: 'Meus arquivos' }];
+    await renderMoveLevel();
+    moveDialog.showModal();
+  }
+
+  async function renderMoveLevel() {
+    const current = moveTrail[moveTrail.length - 1];
+    moveBreadcrumbEl.replaceChildren();
+    moveTrail.forEach((crumb, index) => {
+      if (index > 0) {
+        const sep = document.createElement('span');
+        sep.className = 'vault-breadcrumb-sep';
+        sep.textContent = '/';
+        moveBreadcrumbEl.append(sep);
+      }
+      const isLast = index === moveTrail.length - 1;
+      if (isLast) {
+        const span = document.createElement('span');
+        span.className = 'vault-breadcrumb-current';
+        span.textContent = crumb.name;
+        moveBreadcrumbEl.append(span);
+      } else {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'vault-breadcrumb-link';
+        btn.textContent = crumb.name;
+        btn.addEventListener('click', () => { moveTrail = moveTrail.slice(0, index + 1); renderMoveLevel(); });
+        moveBreadcrumbEl.append(btn);
+      }
+    });
+
+    moveListEl.innerHTML = '<div class="loading-state"><span class="spinner"></span> Carregando pastas…</div>';
+    try {
+      const params = new URLSearchParams({ onlyFolders: '1' });
+      if (current.id) params.set('folderId', current.id);
+      const data = await request(`/api/drive/list?${params.toString()}`);
+      const folders = (Array.isArray(data.files) ? data.files : []).filter((folder) => !moveIds.includes(folder.id));
+      moveListEl.replaceChildren();
+      if (!folders.length) {
+        const empty = document.createElement('p');
+        empty.className = 'move-empty';
+        empty.textContent = 'Nenhuma subpasta aqui.';
+        moveListEl.append(empty);
+      }
+      folders.forEach((folder) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'move-folder-row';
+        row.textContent = folder.name;
+        row.addEventListener('click', () => { moveTrail = [...moveTrail, { id: folder.id, name: folder.name }]; renderMoveLevel(); });
+        moveListEl.append(row);
+      });
+    } catch (error) {
+      moveListEl.replaceChildren();
+      const empty = document.createElement('p');
+      empty.className = 'move-empty';
+      empty.textContent = error.message || 'Não foi possível carregar as pastas.';
+      moveListEl.append(empty);
+    }
+  }
+
+  moveConfirmButton?.addEventListener('click', async () => {
+    const destination = moveTrail[moveTrail.length - 1];
+    moveConfirmButton.disabled = true;
+    moveConfirmButton.textContent = 'Movendo…';
+    let succeeded = 0;
+    const errors = [];
+    try {
+      for (const id of moveIds) {
+        try { await runAction('move', id, undefined, destination.id); succeeded += 1; }
+        catch (error) { errors.push(error.message || 'Falha ao mover'); }
+      }
+      moveDialog.close();
+      selected.clear();
+      updateSelection();
+      if (errors.length) notify(`${succeeded} movido(s); ${errors.length} falharam: ${errors[0]}`, true);
+      else notify(`${succeeded} item(ns) movido(s) para "${destination.name}".`);
+      window.vaultWorkspace?.refresh();
+    } finally {
+      moveConfirmButton.disabled = false;
+      moveConfirmButton.textContent = 'Mover para cá';
+    }
+  });
+  document.querySelector('#moveDialogClose')?.addEventListener('click', () => moveDialog.close());
+  moveDialog?.addEventListener('click', (event) => { if (event.target === moveDialog) moveDialog.close(); });
 
   function enhanceRows() {
     list.querySelectorAll('.file-row').forEach((row) => {
@@ -196,6 +303,7 @@
         checkbox.className = 'vault-manager-checkbox';
         checkbox.setAttribute('aria-label', `Selecionar ${getName(row)}`);
         checkbox.checked = selected.has(id);
+        checkbox.addEventListener('click', (event) => event.stopPropagation());
         checkbox.addEventListener('change', () => {
           if (checkbox.checked) selected.add(id);
           else selected.delete(id);

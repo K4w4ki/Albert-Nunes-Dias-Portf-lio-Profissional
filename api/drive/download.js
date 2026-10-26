@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { AppError, getAccessToken, getDirectChildFile } from '../../lib/google-drive.js';
+import { AppError, FOLDER_MIME, getAccessToken, getVaultFile } from '../../lib/google-drive.js';
 import { requireAdmin, sendJson, setSecurityHeaders } from '../../lib/security.js';
 
 const EXPORTS = {
@@ -25,7 +25,8 @@ export default async function handler(req, res) {
     const fileId = typeof req.query?.id === 'string' ? req.query.id : '';
     if (!fileId) throw new AppError('Faltou o ID do arquivo.', 400, 'INVALID_FILE_ID');
     const token = await getAccessToken();
-    const file = await getDirectChildFile(fileId, token);
+    const file = await getVaultFile(fileId, token);
+    if (file.mimeType === FOLDER_MIME) throw new AppError('Pastas não podem ser baixadas.', 400, 'FOLDER_DOWNLOAD_UNSUPPORTED');
     const googleExport = EXPORTS[file.mimeType];
     const downloadName = googleExport && !file.name.toLowerCase().endsWith(googleExport.extension) ? `${file.name}${googleExport.extension}` : file.name;
     const url = googleExport

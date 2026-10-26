@@ -1,4 +1,4 @@
-import { AppError, beginResumableUpload, getAccessToken } from '../../lib/google-drive.js';
+import { AppError, beginResumableUpload, getAccessToken, resolveVaultFolder } from '../../lib/google-drive.js';
 import { isSameOrigin, parseJsonBody, requireAdmin, sendJson, setSecurityHeaders } from '../../lib/security.js';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024 * 1024; // Limite nominal de 5 TiB do Drive.
@@ -27,7 +27,9 @@ export default async function handler(req, res) {
     if (!Number.isSafeInteger(size) || size < 0 || size > MAX_FILE_SIZE) throw new AppError('Tamanho de arquivo inválido ou acima do limite do Google Drive.', 400, 'INVALID_FILE_SIZE');
 
     const accessToken = await getAccessToken();
-    const uploadUrl = await beginResumableUpload({ name, mimeType, size }, accessToken, req.headers.origin);
+    const folderId = typeof body.folderId === 'string' ? body.folderId : '';
+    const parentId = await resolveVaultFolder(folderId, accessToken);
+    const uploadUrl = await beginResumableUpload({ name, mimeType, size, parentId }, accessToken, req.headers.origin);
     return sendJson(res, 200, { uploadUrl, name });
   } catch (error) {
     return sendJson(res, error.status || 502, { error: error.message || 'Não foi possível preparar o envio.', code: error.code || 'UPLOAD_INIT_FAILED' });

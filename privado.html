@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="theme-color" content="#060a18">
-  <title>Private Vault | Albert Nunes Dias</title>
+  <title>Meus Arquivos | Albert Nunes Dias</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="privado.css">
   <link rel="stylesheet" href="privado-manager.css">
-  <script src="privado-manager.js" defer></script>
   <script src="privado.js" defer></script>
   <script src="privado-manager.js" defer></script>
 </head>
@@ -22,57 +21,54 @@
   <main class="vault-shell">
     <header class="vault-topbar">
       <a class="vault-brand" href="/" aria-label="Voltar ao portfólio">
-        <span class="vault-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.8 14.2 9.8 21.2 12l-7 2.2-2.2 7-2.2-7L2.8 12l7-2.2z"/><circle cx="18.5" cy="5.5" r="1.2"/></svg></span>
-        <span><strong>PRIVATE VAULT</strong><small>ALBERT NUNES DIAS <i> / </i> PERSONAL STORAGE</small></span>
+        <span class="vault-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+        <span><strong>MEUS ARQUIVOS</strong><small>Armazenamento pessoal no Google Drive</small></span>
       </a>
       <div class="topbar-actions">
-        <span class="secure-indicator"><span></span> PRIVATE SESSION</span>
         <a class="subtle-link" href="/">Portfólio <span aria-hidden="true">↗</span></a>
         <button class="icon-button" id="logoutButton" type="button" aria-label="Encerrar sessão" title="Encerrar sessão"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></button>
       </div>
     </header>
 
-    <section class="vault-hero">
-      <p class="eyebrow"><span class="eyebrow-dot"></span> SECURE FILE SYSTEM <span class="eyebrow-divider">/</span> DRIVE BRIDGE</p>
-      <h1>Seu espaço.<br><span>Seu universo.</span></h1>
-      <p class="vault-intro">Uma central privada para armazenar e acessar seus arquivos sem sair desta página.</p>
-      <div class="system-pills"><span><i></i> AUTHENTICATED API</span><span>VERCEL FUNCTIONS</span><span>GOOGLE DRIVE API</span></div>
-    </section>
-
     <section class="panel login-panel" id="loginPanel" hidden>
-      <div class="panel-orb" aria-hidden="true">⌁</div>
-      <p class="panel-kicker">IDENTITY CHECK</p>
+      <p class="panel-kicker">ENTRAR</p>
       <h2>Autenticação necessária</h2>
-      <p>Esta área exige sua senha administrativa. O acesso aos arquivos é validado no servidor.</p>
+      <p>Esta área exige sua senha. O acesso aos arquivos é validado no servidor.</p>
       <form id="privateLoginForm" class="private-login-form">
         <label for="privatePassword">Senha de acesso</label>
         <input id="privatePassword" name="password" type="password" autocomplete="current-password" required maxlength="512" placeholder="Digite sua senha">
-        <button class="primary-button" id="privateLoginButton" type="submit">Entrar na central <span aria-hidden="true">→</span></button>
+        <button class="primary-button" id="privateLoginButton" type="submit">Entrar <span aria-hidden="true">→</span></button>
         <p class="form-message" id="loginMessage" role="alert" hidden></p>
       </form>
     </section>
 
     <section class="panel setup-panel" id="setupPanel" hidden>
-      <div class="panel-heading"><span class="panel-icon">✧</span><div><p class="panel-kicker">FIRST-TIME SETUP</p><h2>Conecte seu Google Drive</h2></div></div>
-      <p class="panel-description">A autenticação do painel está ativa. Falta configurar a conexão do Google Drive uma única vez.</p>
+      <div class="panel-heading"><span class="panel-icon">✧</span><div><p class="panel-kicker">PRIMEIRA CONFIGURAÇÃO</p><h2>Conecte seu Google Drive</h2></div></div>
+      <p class="panel-description">O login já está funcionando. Falta só conectar o Google Drive, uma única vez.</p>
       <ol class="setup-steps">
         <li><span>01</span><div><strong>Configure o Google Cloud</strong><p>Ative a Google Drive API e crie um OAuth Client do tipo Web.</p></div></li>
-        <li><span>02</span><div><strong>Adicione as variáveis iniciais na Vercel</strong><p>APP_BASE_URL, GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET.</p></div></li>
-        <li><span>03</span><div><strong>Autorize e crie a pasta privada</strong><p>O Google pedirá permissão limitada ao escopo drive.file. A pasta dedicada será criada no seu Drive.</p></div></li>
-        <li><span>04</span><div><strong>Salve os dois valores retornados</strong><p>Copie GOOGLE_REFRESH_TOKEN e GOOGLE_DRIVE_FOLDER_ID para as variáveis de ambiente da Vercel e publique novamente.</p></div></li>
+        <li><span>02</span><div><strong>Adicione as variáveis iniciais</strong><p>APP_BASE_URL, GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET.</p></div></li>
+        <li><span>03</span><div><strong>Autorize e crie a pasta privada</strong><p>O Google vai pedir permissão limitada ao escopo drive.file. A pasta dedicada será criada no seu Drive.</p></div></li>
+        <li><span>04</span><div><strong>Salve os dois valores retornados</strong><p>Copie GOOGLE_REFRESH_TOKEN e GOOGLE_DRIVE_FOLDER_ID para as variáveis de ambiente e publique novamente.</p></div></li>
       </ol>
       <a class="primary-button setup-link" href="/api/google/start">Autorizar Google Drive <span aria-hidden="true">↗</span></a>
-      <p class="setup-note">Nunca cole tokens ou senhas neste site público nem em arquivos do GitHub.</p>
+      <p class="setup-note">Não cole tokens ou senhas neste site público nem em arquivos do GitHub.</p>
     </section>
 
     <section class="workspace" id="workspace" hidden>
       <div class="workspace-head">
-        <div><p class="panel-kicker">FILE EXPLORER <span class="muted-slash">/</span> ROOT DIRECTORY</p><h2>Seus arquivos <span class="title-count" id="fileCount">0</span></h2><p class="workspace-subtitle">Arquivos na pasta privada do seu Google Drive.</p></div>
-        <button class="secondary-button" id="refreshButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5a7 7 0 0 0 11.8-2"/></svg> Atualizar</button>
+        <div>
+          <h2>Arquivos <span class="title-count" id="fileCount">0</span></h2>
+          <nav class="vault-breadcrumb" id="breadcrumb" aria-label="Caminho de pastas"></nav>
+        </div>
+        <div class="workspace-head-actions">
+          <button class="secondary-button" id="newFolderButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v4M10 13h4"/></svg> Nova pasta</button>
+          <button class="secondary-button" id="refreshButton" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5a7 7 0 0 0 11.8-2"/></svg> Atualizar</button>
+        </div>
       </div>
 
       <div class="upload-panel">
-        <div class="upload-copy"><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></span><div><strong>Enviar novos arquivos</strong><p>Escolha um ou mais arquivos do seu dispositivo. O envio vai direto para o Google Drive.</p></div></div>
+        <div class="upload-copy"><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></span><div><strong>Enviar arquivos</strong><p>Vão direto para a pasta que você estiver vendo agora.</p></div></div>
         <div class="upload-controls"><label class="secondary-button file-pick" for="fileInput">Selecionar arquivos</label><input id="fileInput" type="file" multiple><button class="primary-button upload-button" id="uploadButton" type="button" disabled>Enviar <span aria-hidden="true">↑</span></button></div>
         <div class="upload-progress-wrap" id="uploadProgressWrap" hidden><div class="progress-top"><span id="uploadStatus">Preparando envio…</span><span id="uploadPercent">0%</span></div><div class="progress-track"><span id="uploadProgressFill"></span></div></div>
         <p class="workspace-message" id="workspaceMessage" role="status" hidden></p>
@@ -81,11 +77,20 @@
       <div class="file-list-head"><span>ARQUIVO</span><span>TIPO</span><span>MODIFICADO</span><span>AÇÃO</span></div>
       <div class="file-list" id="fileList" aria-live="polite"><div class="loading-state"><span class="spinner"></span> Consultando o Drive…</div></div>
       <button class="secondary-button load-more" id="loadMoreButton" type="button" hidden>Carregar mais arquivos</button>
-      <div class="workspace-foot"><span><i></i> CONEXÃO AUTENTICADA</span><span>PASTA RESTRITA <b>•</b> SEM ACESSO PÚBLICO</span></div>
     </section>
-
-    <footer class="vault-footer"><span>PRIVATE VAULT <b>V1.0</b></span><span>BUILT FOR PERSONAL USE <i>✧</i></span></footer>
   </main>
+
+  <dialog class="move-dialog" id="moveDialog">
+    <div class="move-dialog-inner">
+      <button class="move-dialog-close" id="moveDialogClose" type="button" aria-label="Fechar">×</button>
+      <h2>Mover para…</h2>
+      <p class="move-dialog-copy">Escolha a pasta de destino.</p>
+      <nav class="vault-breadcrumb move-breadcrumb" id="moveBreadcrumb" aria-label="Caminho de pastas"></nav>
+      <div class="move-folder-list" id="moveFolderList"></div>
+      <button class="primary-button move-confirm" id="moveConfirm" type="button">Mover para cá</button>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
