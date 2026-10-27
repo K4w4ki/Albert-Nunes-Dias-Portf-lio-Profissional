@@ -447,6 +447,100 @@
   window.addEventListener('scroll', closeContextMenu, true);
   window.addEventListener('resize', closeContextMenu);
 
+  // --- Arrastar e soltar para mover, igual a um explorador de arquivos ---
+
+  let draggedIds = [];
+
+  function clearDropTargets() {
+    document.querySelectorAll('.is-drop-target').forEach((el) => el.classList.remove('is-drop-target'));
+  }
+
+  function handleRowDragStart(event, row) {
+    const id = row.dataset.vaultId;
+    if (!selected.has(id)) {
+      selected.clear();
+      selected.add(id);
+      syncCheckboxesFromSelection();
+      updateSelection();
+    }
+    draggedIds = [...selected];
+    list.querySelectorAll('.file-row[data-vault-id]').forEach((r) => {
+      if (selected.has(r.dataset.vaultId)) r.classList.add('is-dragging');
+    });
+    event.dataTransfer.effectAllowed = 'move';
+    try { event.dataTransfer.setData('text/plain', draggedIds.join(',')); } catch { /* alguns navegadores exigem isso mesmo sem uso real */ }
+  }
+
+  function handleRowDragEnd() {
+    draggedIds = [];
+    list.querySelectorAll('.is-dragging').forEach((row) => row.classList.remove('is-dragging'));
+    clearDropTargets();
+  }
+
+  function handleRowDragEnter(event, row) {
+    if (!draggedIds.length || draggedIds.includes(row.dataset.vaultId)) return;
+    event.preventDefault();
+    row.classList.add('is-drop-target');
+  }
+
+  function handleRowDragOver(event) {
+    if (!draggedIds.length) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }
+
+  function handleRowDragLeave(event, row) {
+    if (row.contains(event.relatedTarget)) return;
+    row.classList.remove('is-drop-target');
+  }
+
+  async function handleDrop(event, targetEl, targetId, targetName) {
+    if (!draggedIds.length) return;
+    event.preventDefault();
+    targetEl.classList.remove('is-drop-target');
+    const ids = draggedIds.filter((id) => id !== targetId);
+    draggedIds = [];
+    if (!ids.length) return;
+    let succeeded = 0;
+    const errors = [];
+    for (const id of ids) {
+      try { await runAction('move', id, undefined, targetId); succeeded += 1; }
+      catch (error) { errors.push(error.message || 'Falha ao mover'); }
+    }
+    selected.clear();
+    updateSelection();
+    if (errors.length) notify(`${succeeded} movido(s); ${errors.length} falharam: ${errors[0]}`, true);
+    else notify(`${succeeded} item(ns) movido(s) para "${targetName}".`);
+    window.vaultWorkspace?.refresh();
+  }
+
+  // O breadcrumb (caminho de pastas, no topo) também vira um alvo de soltar,
+  // pra dá pra arrastar um item direto pra uma pasta mãe sem precisar abri-la antes.
+  function wireBreadcrumbDrop() {
+    const breadcrumbEl = document.querySelector('#breadcrumb');
+    breadcrumbEl?.querySelectorAll('.vault-breadcrumb-link[data-folder-id]').forEach((link) => {
+      if (link.dataset.vaultDropWired) return;
+      link.dataset.vaultDropWired = '1';
+      link.addEventListener('dragenter', (event) => {
+        if (!draggedIds.length) return;
+        event.preventDefault();
+        link.classList.add('is-drop-target');
+      });
+      link.addEventListener('dragover', (event) => { if (draggedIds.length) event.preventDefault(); });
+      link.addEventListener('dragleave', (event) => {
+        if (link.contains(event.relatedTarget)) return;
+        link.classList.remove('is-drop-target');
+      });
+      link.addEventListener('drop', (event) => handleDrop(event, link, link.dataset.folderId, link.textContent));
+    });
+  }
+
+  const breadcrumbEl = document.querySelector('#breadcrumb');
+  if (breadcrumbEl) {
+    wireBreadcrumbDrop();
+    new MutationObserver(wireBreadcrumbDrop).observe(breadcrumbEl, { childList: true });
+  }
+
   function enhanceRows() {
     list.querySelectorAll('.file-row').forEach((row) => {
       const id = getId(row);
@@ -466,6 +560,18 @@
         });
         const info = row.querySelector('.file-info');
         if (info) info.prepend(checkbox);
+      }
+      if (!row.dataset.vaultDragWired) {
+        row.dataset.vaultDragWired = '1';
+        row.draggable = true;
+        row.addEventListener('dragstart', (event) => handleRowDragStart(event, row));
+        row.addEventListener('dragend', handleRowDragEnd);
+        if (isFolderRow(row)) {
+          row.addEventListener('dragenter', (event) => handleRowDragEnter(event, row));
+          row.addEventListener('dragover', handleRowDragOver);
+          row.addEventListener('dragleave', (event) => handleRowDragLeave(event, row));
+          row.addEventListener('drop', (event) => handleDrop(event, row, id, getName(row)));
+        }
       }
     });
     updateSelection();

@@ -138,6 +138,7 @@
         link.type = 'button';
         link.className = 'vault-breadcrumb-link';
         link.textContent = crumb.name;
+        link.dataset.folderId = crumb.id;
         link.addEventListener('click', () => openFolder(crumb.id, crumb.name, breadcrumbPath.slice(0, index + 1)));
         breadcrumbEl.append(link);
       }
@@ -243,6 +244,7 @@
       action.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg> Baixar';
     }
 
+    action.draggable = false;
     row.append(info, type, date, action);
     if (isFolder) {
       row.addEventListener('click', (event) => {
