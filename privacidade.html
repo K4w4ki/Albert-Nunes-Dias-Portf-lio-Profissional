@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#060a18">
+  <title>Política de Privacidade | Albert Nunes Dias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{color-scheme:dark;--space:#060a18;--panel:rgba(13,23,47,.8);--line:rgba(144,169,214,.17);--text:#edf3ff;--muted:#90a2c5;--blue:#73aaff;--font-body:'Inter',system-ui,sans-serif;--font-display:'Manrope','Inter',sans-serif}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--space)}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,rgba(27,65,135,.22),transparent 48%),linear-gradient(180deg,#060a18 0%,#080d1d 58%,#060917 100%);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    a{color:var(--blue)}
+    .shell{width:min(760px,calc(100% - 44px));margin:0 auto;padding:56px 0 80px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.85rem;text-decoration:none;margin-bottom:28px}
+    .back:hover{color:var(--text)}
+    h1{font:800 clamp(1.7rem,4vw,2.4rem)/1.15 var(--font-display);letter-spacing:-.03em;margin:0 0 8px;color:#f6f8ff}
+    .updated{color:var(--muted);font-size:.82rem;margin:0 0 40px}
+    h2{font:700 1.1rem var(--font-display);letter-spacing:-.02em;color:#f0f4ff;margin:36px 0 10px}
+    p,li{color:#b7c3de}
+    ul{padding-left:20px;margin:10px 0}
+    li{margin:6px 0}
+    .panel{margin-top:44px;padding:20px 22px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .panel p{margin:0;color:#9aacca;font-size:.85rem}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <a class="back" href="/">← Voltar ao portfólio</a>
+    <h1>Política de Privacidade</h1>
+    <p class="updated">Última atualização: outubro de 2026</p>
+
+    <p>Esta página descreve como o aplicativo <strong>Meus Arquivos</strong>, hospedado em <a href="https://albert-dias.vercel.app/">albert-dias.vercel.app</a>, acessa e trata dados ao se conectar com o Google Drive.</p>
+
+    <h2>O que é este aplicativo</h2>
+    <p>É uma ferramenta de uso pessoal, desenvolvida e operada por Albert Nunes Dias, que funciona como um gerenciador de arquivos privado conectado à conta do Google Drive do próprio desenvolvedor. O acesso é protegido por senha e destinado exclusivamente ao uso do proprietário do site.</p>
+
+    <h2>Quais dados são acessados</h2>
+    <p>O aplicativo usa a API do Google Drive apenas com o escopo <code>drive.file</code>. Isso significa que ele só pode ver, criar, renomear, mover e excluir arquivos e pastas que foram criados ou enviados através do próprio aplicativo — ele não tem acesso ao restante do Google Drive da conta.</p>
+    <ul>
+      <li>Nomes, tamanhos, datas de modificação e conteúdo dos arquivos enviados pelo aplicativo.</li>
+      <li>Nenhum outro arquivo, pasta ou dado da conta Google é lido, listado ou modificado.</li>
+    </ul>
+
+    <h2>Como os dados são armazenados</h2>
+    <ul>
+      <li>O token de autorização do Google (refresh token) fica guardado como variável de ambiente no servidor (Vercel), nunca em código público ou em bancos de dados de terceiros.</li>
+      <li>O login no aplicativo usa um cookie de sessão assinado, com duração limitada, usado apenas para confirmar que quem está acessando é o administrador.</li>
+      <li>Os próprios arquivos enviados continuam armazenados no Google Drive da conta do desenvolvedor — este site não guarda cópias deles em nenhum outro lugar.</li>
+    </ul>
+
+    <h2>Compartilhamento com terceiros</h2>
+    <p>Nenhum dado é vendido, compartilhado ou transmitido a terceiros. As únicas comunicações realizadas são diretamente com as APIs do Google, necessárias para o funcionamento do gerenciador de arquivos.</p>
+
+    <h2>Revogar o acesso</h2>
+    <p>O acesso do aplicativo ao Google Drive pode ser revogado a qualquer momento em <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</p>
+
+    <h2>Contato</h2>
+    <p>Dúvidas sobre esta política podem ser enviadas através dos canais de contato disponíveis no <a href="/">portfólio</a>.</p>
+
+    <div class="panel">
+      <p>Esta é uma ferramenta pessoal e não é destinada a uso público ou comercial. Esta política existe para cumprir os requisitos da tela de consentimento OAuth do Google.</p>
+    </div>
+  </main>
+</body>
+</html>
